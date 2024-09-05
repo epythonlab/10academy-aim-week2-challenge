@@ -18,7 +18,7 @@ class TestHandsetAnalysis(unittest.TestCase):
         cls.analysis = HandsetAnalysis(cls.df)
     
     def test_top_handsets(self):
-        top_handsets = self.analysis.top_handsets(self.df, top_n=2)
+        top_handsets = self.analysis.top_handsets(top_n=2)
         expected = pd.Series({
             'iPhone 6S': 2,
             'iPhone 6': 2
@@ -26,7 +26,7 @@ class TestHandsetAnalysis(unittest.TestCase):
         pd.testing.assert_series_equal(top_handsets, expected)
 
     def test_top_manufacturers(self):
-        top_manufacturers = self.analysis.top_manufacturers(self.df, top_n=2)
+        top_manufacturers = self.analysis.top_manufacturers(top_n=2)
         expected = pd.Series({
             'Apple': 4,
             'Samsung': 2
@@ -35,7 +35,7 @@ class TestHandsetAnalysis(unittest.TestCase):
     
     def test_top_handsets_per_manufacturer(self):
         manufacturers = ['Apple', 'Samsung']
-        top_handsets = self.analysis.top_handsets_per_manufacturer(self.df, manufacturers, top_n_handsets=1)
+        top_handsets = self.analysis.top_handsets_per_manufacturer(manufacturers, top_n_handsets=1)
         
         expected = {
             'Apple': pd.Series({'iPhone 6S': 2}),
@@ -44,6 +44,7 @@ class TestHandsetAnalysis(unittest.TestCase):
         
         for manufacturer in manufacturers:
             pd.testing.assert_series_equal(top_handsets[manufacturer], expected[manufacturer])
+
 
     
 
