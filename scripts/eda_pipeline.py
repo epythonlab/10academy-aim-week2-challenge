@@ -11,8 +11,25 @@ class EDA:
     def __init__(self, df):
         self.df = df
 
-    def basic_statistics(self):
-        return self.df.describe()
+    def compute_basic_metrics(self):
+        metrics = {}
+        
+        # Columns of interest
+        columns_of_interest = ['Dur. (ms)', 'Total UL (Bytes)', 'Total DL (Bytes)']
+        
+        for col in columns_of_interest:
+            metrics[col] = {
+                'mean': self.df[col].mean(),
+                'median': self.df[col].median(),
+                'std_dev': self.df[col].std(),
+                '90th_percentile': self.df[col].quantile(0.90),
+                'min': self.df[col].min(),
+                'max': self.df[col].max()
+            }
+        
+        # Convert the metrics into a DataFrame for better presentation
+        metrics_df = pd.DataFrame(metrics)
+        return metrics_df
     
     def segment_users_by_decile(self):
         # Ensure 'Dur. (ms)', 'Total DL (Bytes)', and 'Total UL (Bytes)' columns are numeric
