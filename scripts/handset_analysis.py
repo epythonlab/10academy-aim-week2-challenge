@@ -1,6 +1,9 @@
 import pandas as pd
-class UserAnalysis:
+class HandsetAnalysis:
     
+    def __init__(self, df):
+        self.df = df
+        
     def top_handsets(df, top_n=10):
         top_handsets = df['Handset Type'].value_counts().head(top_n)
         return top_handsets
@@ -20,20 +23,20 @@ class UserAnalysis:
             results[manufacturer] = top_handsets
         return results
     
-    def segment_users_by_decile(df):
-        # Ensure that 'Dur. (ms)' column is numeric
-        df['Dur. (ms)'] = pd.to_numeric(df['Dur. (ms)'], errors='coerce')
+    # def segment_users_by_decile(df):
+    #     # Ensure that 'Dur. (ms)' column is numeric
+    #     df['Dur. (ms)'] = pd.to_numeric(df['Dur. (ms)'], errors='coerce')
         
-        # Create deciles
-        df['Decile'] = pd.qcut(df['Dur. (ms)'], 10, labels=False)
+    #     # Create deciles
+    #     df['Decile'] = pd.qcut(df['Dur. (ms)'], 10, labels=False)
         
-        # Drop duplicate rows if needed
-        df = df.drop_duplicates(subset=['Decile', 'Total DL (Bytes)', 'Total UL (Bytes)'])
+    #     # Drop duplicate rows if needed
+    #     df = df.drop_duplicates(subset=['Decile', 'Total DL (Bytes)', 'Total UL (Bytes)'])
         
-        # Aggregate by decile
-        result = df.groupby('Decile').agg({
-            'Total DL (Bytes)': 'sum',
-            'Total UL (Bytes)': 'sum',
-        }).reset_index()
+    #     # Aggregate by decile
+    #     result = df.groupby('Decile').agg({
+    #         'Total DL (Bytes)': 'sum',
+    #         'Total UL (Bytes)': 'sum',
+    #     }).reset_index()
         
         return result
