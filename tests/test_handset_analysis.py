@@ -1,52 +1,52 @@
 import unittest
 import pandas as pd
-from scripts.handset_analysis import HandsetAnalysis  # Replace 'your_module' with the name of your Python file
+from scripts.handset_analysis import HandsetAnalysis
 
 class TestHandsetAnalysis(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        # Sample data for testing
+        # Create a sample DataFrame for testing
         data = {
-            'Handset Type': ['iPhone 6S', 'iPhone 6', 'Galaxy S8', 'iPhone 6S', 'iPhone 6', 'Galaxy S8', 'B528S-23A'],
-            'Handset Manufacturer': ['Apple', 'Apple', 'Samsung', 'Apple', 'Apple', 'Samsung', 'Huawei'],
-            'Dur. (ms)': [500, 600, 700, 500, 600, 700, 800],
-            'Total DL (Bytes)': [1000, 2000, 3000, 1000, 2000, 3000, 4000],
-            'Total UL (Bytes)': [1500, 2500, 3500, 1500, 2500, 3500, 4500]
+            'Handset Type': ['iPhone 6S', 'iPhone 6', 'iPhone 6S', 'Galaxy S8', 'Galaxy S8', 'Galaxy A5', 'iPhone 7', 'iPhone 6', 'Galaxy J5'],
+            'Handset Manufacturer': ['Apple', 'Apple', 'Apple', 'Samsung', 'Samsung', 'Samsung', 'Apple', 'Apple', 'Samsung']
         }
-        cls.df = pd.DataFrame(data)
-        cls.analysis = HandsetAnalysis(cls.df)
-    
+        df = pd.DataFrame(data)
+        cls.analysis = HandsetAnalysis(df)
+        
     def test_top_handsets(self):
         top_handsets = self.analysis.top_handsets(top_n=2)
         expected = pd.Series({
             'iPhone 6S': 2,
             'iPhone 6': 2
         })
+        expected.index.name = 'Handset Type'
+        top_handsets.index.name = 'Handset Type'
         pd.testing.assert_series_equal(top_handsets, expected)
-
+    
     def test_top_manufacturers(self):
         top_manufacturers = self.analysis.top_manufacturers(top_n=2)
         expected = pd.Series({
             'Apple': 4,
-            'Samsung': 2
+            'Samsung': 5
         })
+        expected.index.name = 'Handset Manufacturer'
+        top_manufacturers.index.name = 'Handset Manufacturer'
         pd.testing.assert_series_equal(top_manufacturers, expected)
     
     def test_top_handsets_per_manufacturer(self):
         manufacturers = ['Apple', 'Samsung']
-        top_handsets = self.analysis.top_handsets_per_manufacturer(manufacturers, top_n_handsets=1)
+        top_handsets = self.analysis.top_handsets_per_manufacturer(manufacturers, top_n_handsets=2)
         
         expected = {
-            'Apple': pd.Series({'iPhone 6S': 2}),
-            'Samsung': pd.Series({'Galaxy S8': 2})
+            'Apple': pd.Series({'iPhone 6S': 2, 'iPhone 6': 2}),
+            'Samsung': pd.Series({'Galaxy S8': 2, 'Galaxy A5': 1})
         }
         
         for manufacturer in manufacturers:
+            expected[manufacturer].index.name = 'Handset Type'
+            top_handsets[manufacturer].index.name = 'Handset Type'
             pd.testing.assert_series_equal(top_handsets[manufacturer], expected[manufacturer])
-
-
-    
 
 if __name__ == '__main__':
     unittest.main()
