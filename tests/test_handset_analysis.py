@@ -45,15 +45,7 @@ class TestHandsetAnalysis(unittest.TestCase):
         for manufacturer in manufacturers:
             pd.testing.assert_series_equal(top_handsets[manufacturer], expected[manufacturer])
 
-    # Uncomment and update the segment_users_by_decile test if needed
-    # def test_segment_users_by_decile(self):
-    #     segmented = self.analysis.segment_users_by_decile(self.df)
-    #     expected = pd.DataFrame({
-    #         'Decile': [0, 1, 2],
-    #         'Total DL (Bytes)': [2000, 2000, 3000],
-    #         'Total UL (Bytes)': [2500, 2500, 3500]
-    #     })
-    #     pd.testing.assert_frame_equal(segmented, expected)
+    
 
 if __name__ == '__main__':
     unittest.main()
