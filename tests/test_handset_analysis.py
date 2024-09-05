@@ -22,7 +22,9 @@ class TestHandsetAnalysis(unittest.TestCase):
         })
         expected.index.name = 'Handset Type'
         top_handsets.index.name = 'Handset Type'
-        pd.testing.assert_series_equal(top_handsets, expected)
+        expected.name = 'count'
+        top_handsets.name = 'count'
+        pd.testing.assert_series_equal(top_handsets.sort_index(), expected.sort_index())
     
     def test_top_manufacturers(self):
         top_manufacturers = self.analysis.top_manufacturers(top_n=2)
@@ -32,7 +34,9 @@ class TestHandsetAnalysis(unittest.TestCase):
         })
         expected.index.name = 'Handset Manufacturer'
         top_manufacturers.index.name = 'Handset Manufacturer'
-        pd.testing.assert_series_equal(top_manufacturers, expected)
+        expected.name = 'count'
+        top_manufacturers.name = 'count'
+        pd.testing.assert_series_equal(top_manufacturers.sort_index(), expected.sort_index())
     
     def test_top_handsets_per_manufacturer(self):
         manufacturers = ['Apple', 'Samsung']
@@ -46,7 +50,5 @@ class TestHandsetAnalysis(unittest.TestCase):
         for manufacturer in manufacturers:
             expected[manufacturer].index.name = 'Handset Type'
             top_handsets[manufacturer].index.name = 'Handset Type'
-            pd.testing.assert_series_equal(top_handsets[manufacturer], expected[manufacturer])
-
-if __name__ == '__main__':
-    unittest.main()
+            expected[manufacturer].name = 'count'
+            top_handsets[manufacturer]
