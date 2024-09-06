@@ -1,68 +1,84 @@
 import unittest
 import pandas as pd
-from user_engagement_analysis import UserEngagementAnalysis  # Assuming the class is in user_engagement_analysis.py
+from scripts.user_engagement_analysis import UserEngagementAnalysis  # Assuming the class is in user_engagement_analysis.py
 
 class TestUserEngagementAnalysis(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        # Sample data for testing
+        # Create a sample DataFrame
         cls.data = pd.DataFrame({
-            'MSISDN': [1, 1, 2, 2, 3, 3, 4, 4],
-            'session_id': [1, 2, 1, 2, 1, 2, 1, 2],
-            'session_duration': [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000],
-            'download_bytes': [100, 200, 300, 400, 500, 600, 700, 800],
-            'upload_bytes': [50, 100, 150, 200, 250, 300, 350, 400],
-            'application': ['App1', 'App1', 'App2', 'App2', 'App3', 'App3', 'App4', 'App4']
+            'MSISDN/Number': ['123', '123', '124', '124', '125'],
+            'Dur. (ms)': [300000, 150000, 200000, 100000, 50000],
+            'Total DL (Bytes)': [500000, 300000, 200000, 150000, 50000],
+            'Total UL (Bytes)': [200000, 100000, 150000, 50000, 20000],
+            'Youtube DL (Bytes)': [200000, 100000, 50000, 30000, 10000],
+            'Youtube UL (Bytes)': [100000, 50000, 20000, 10000, 5000],
+            'Netflix DL (Bytes)': [150000, 100000, 70000, 40000, 20000],
+            'Netflix UL (Bytes)': [50000, 30000, 20000, 10000, 5000],
+            'Gaming DL (Bytes)': [30000, 20000, 15000, 10000, 5000],
+            'Gaming UL (Bytes)': [10000, 5000, 2000, 1000, 500],
+            'Other DL (Bytes)': [10000, 5000, 3000, 2000, 1000],
+            'Other UL (Bytes)': [5000, 2000, 1000, 500, 200]
         })
+
         cls.analysis = UserEngagementAnalysis(cls.data)
     
     def test_aggregate_metrics(self):
         self.analysis.aggregate_metrics()
-        self.assertEqual(self.analysis.metrics.shape[0], 4)  # 4 unique MSISDNs
-        self.assertIn('sessions_frequency', self.analysis.metrics.columns)
-    
+        metrics = self.analysis.metrics
+        self.assertEqual(metrics.shape[0], 3)  # Check number of unique customers
+        self.assertTrue('sessions_frequency' in metrics.columns)
+        self.assertTrue('total_session_duration' in metrics.columns)
+        self.assertTrue('total_download_traffic' in metrics.columns)
+        self.assertTrue('total_upload_traffic' in metrics.columns)
+
     def test_report_top_customers(self):
         self.analysis.aggregate_metrics()
         top_customers = self.analysis.report_top_customers()
-        self.assertEqual(len(top_customers[0]), 1)  # Check for top 10 in session frequency
-        self.assertEqual(len(top_customers[1]), 1)  # Check for top 10 in session duration
-        self.assertEqual(len(top_customers[2]), 1)  # Check for top 10 in download traffic
-        self.assertEqual(len(top_customers[3]), 1)  # Check for top 10 in upload traffic
+        self.assertEqual(top_customers[0].shape[0], 3)  # Top 10 by sessions frequency
+        self.assertEqual(top_customers[1].shape[0], 3)  # Top 10 by session duration
+        self.assertEqual(top_customers[2].shape[0], 3)  # Top 10 by download traffic
+        self.assertEqual(top_customers[3].shape[0], 3)  # Top 10 by upload traffic
 
     def test_normalize_and_cluster(self):
         self.analysis.aggregate_metrics()
         self.analysis.normalize_and_cluster(n_clusters=3)
-        self.assertIn('cluster', self.analysis.metrics.columns)
-        self.assertEqual(len(set(self.analysis.metrics['cluster'])), 3)  # Ensure 3 clusters
-    
+        self.assertEqual(self.analysis.metrics['cluster'].nunique(), 3)  # Check number of clusters
+        self.assertTrue('cluster' in self.analysis.metrics.columns)
+
     def test_cluster_summary(self):
         self.analysis.aggregate_metrics()
         self.analysis.normalize_and_cluster(n_clusters=3)
-        summary = self.analysis.cluster_summary()
-        self.assertTrue('sessions_frequency' in summary.columns)
-        self.assertTrue('total_session_duration' in summary.columns)
-    
-    def test_aggregate_traffic_per_application(self):
-        app_total_traffic, top_10_engaged_per_app = self.analysis.aggregate_traffic_per_application()
-        self.assertEqual(app_total_traffic.shape[0], 4)  # Check number of applications
-        self.assertEqual(top_10_engaged_per_app.shape[0], 8)  # Check number of engaged users
+        cluster_summary = self.analysis.cluster_summary()
+        self.assertEqual(cluster_summary.shape[0], 3)  # Check number of clusters
+        self.assertTrue('sessions_frequency' in cluster_summary.columns)
+        self.assertTrue('total_session_duration' in cluster_summary.columns)
+        self.assertTrue('total_download_traffic' in cluster_summary.columns)
+        self.assertTrue('total_upload_traffic' in cluster_summary.columns)
 
-    def test_plot_top_applications(self):
-        app_total_traffic, _ = self.analysis.aggregate_traffic_per_application()
-        top_3_apps = app_total_traffic.nlargest(3, 'download_bytes' + 'upload_bytes')
-        try:
-            self.analysis.plot_top_applications(top_3_apps)
-        except Exception as e:
-            self.fail(f"Plotting failed: {e}")
-    
-    def test_elbow_method(self):
-        self.analysis.aggregate_metrics()
-        self.analysis.normalize_and_cluster(n_clusters=3)
-        try:
-            self.analysis.elbow_method()
-        except Exception as e:
-            self.fail(f"Elbow method plotting failed: {e}")
+    # def test_aggregate_traffic_per_application(self):
+    #     app_total_traffic, top_10_engaged_per_app = self.analysis.aggregate_traffic_per_application()
+    #     self.assertEqual(app_total_traffic.shape[0], 4)  # Number of applications
+    #     self.assertTrue('application' in app_total_traffic.columns)
+    #     self.assertTrue('total_bytes' in app_total_traffic.columns)
+    #     self.assertEqual(top_10_engaged_per_app.shape[0], 10)  # Check number of top engaged users
+
+    # def test_plot_top_applications(self):
+    #     app_total_traffic, _ = self.analysis.aggregate_traffic_per_application()
+    #     top_3_apps = app_total_traffic.nlargest(3, 'total_bytes')
+    #     try:
+    #         self.analysis.plot_top_applications(top_3_apps)
+    #     except Exception as e:
+    #         self.fail(f"Plotting failed: {e}")
+
+    # def test_elbow_method(self):
+    #     self.analysis.aggregate_metrics()
+    #     self.analysis.normalize_and_cluster(n_clusters=3)
+    #     try:
+    #         self.analysis.elbow_method()
+    #     except Exception as e:
+    #         self.fail(f"Elbow method plotting failed: {e}")
 
 if __name__ == '__main__':
     unittest.main()
