@@ -15,15 +15,15 @@ class UserEngagementAnalysis:
 
     def aggregate_metrics(self):
         # Aggregate metrics per customer ID (MSISDN)
-        self.metrics = self.data.groupby('MSISDN').agg({
-            'session_id': 'count',        # Frequency of sessions
-            'session_duration': 'sum',    # Duration of sessions
-            'download_bytes': 'sum',      # Total download traffic
-            'upload_bytes': 'sum'         # Total upload traffic
+        self.metrics = self.data.groupby('MSISDN/Number').agg({
+            'Dur. (ms)': 'sum',                    # Total duration of sessions
+            'Total DL (Bytes)': 'sum',             # Total download traffic
+            'Total UL (Bytes)': 'sum'              # Total upload traffic
         }).reset_index()
 
         # Rename columns for clarity
-        self.metrics.columns = ['MSISDN', 'sessions_frequency', 'total_session_duration', 'total_download_traffic', 'total_upload_traffic']
+        self.metrics.columns = ['MSISDN/Number', 'total_session_duration', 'total_download_traffic', 'total_upload_traffic']
+        self.metrics['sessions_frequency'] = self.data.groupby('MSISDN/Number').size().reset_index(name='session_id')['session_id']
 
     def report_top_customers(self):
         # Report the top 10 customers per engagement metric
@@ -52,26 +52,36 @@ class UserEngagementAnalysis:
         }).reset_index()
         return cluster_summary
 
-    def aggregate_traffic_per_application(self):
-        app_traffic = self.data.groupby(['application', 'MSISDN']).agg({
-            'download_bytes': 'sum',
-            'upload_bytes': 'sum'
-        }).reset_index()
+    def aggregate_traffic_per_application(self, applications):
+        
+
+        app_traffic = pd.DataFrame()
+
+        for app, columns in applications.items():
+            app_dl, app_ul = columns
+            temp_traffic = self.data.groupby('MSISDN/Number').agg({
+                app_dl: 'sum',
+                app_ul: 'sum'
+            }).reset_index().rename(columns={app_dl: 'download_bytes', app_ul: 'upload_bytes', 'MSISDN/Number': 'MSISDN'})
+            temp_traffic['application'] = app
+            app_traffic = pd.concat([app_traffic, temp_traffic], ignore_index=True)
         
         # Compute total traffic per application
         app_total_traffic = app_traffic.groupby('application').agg({
             'download_bytes': 'sum',
             'upload_bytes': 'sum'
         }).reset_index()
+        app_total_traffic['total_bytes'] = app_total_traffic['download_bytes'] + app_total_traffic['upload_bytes']
         
         # Get top 10 most engaged users per application
-        top_10_engaged_per_app = app_traffic.groupby('application').apply(lambda x: x.nlargest(10, 'download_bytes' + 'upload_bytes')).reset_index(drop=True)
+        app_traffic['total_bytes'] = app_traffic['download_bytes'] + app_traffic['upload_bytes']
+        top_10_engaged_per_app = app_traffic.groupby('application').apply(lambda x: x.nlargest(10, 'total_bytes')).reset_index(drop=True)
         return app_total_traffic, top_10_engaged_per_app
 
     def plot_top_applications(self, top_3_apps):
         # Plot the top 3 most used applications
         plt.figure(figsize=(12, 6))
-        sns.barplot(x='application', y='download_bytes' + 'upload_bytes', data=top_3_apps)
+        sns.barplot(x='application', y='total_bytes', data=top_3_apps)
         plt.title('Top 3 Most Used Applications by Total Traffic')
         plt.xlabel('Application')
         plt.ylabel('Total Traffic (Bytes)')
