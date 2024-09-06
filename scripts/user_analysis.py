@@ -1,6 +1,6 @@
 import pandas as pd
 
-class UserBehavierAnalasis:
+class UserBehavierAnalysis:
     
     def __init__(self, df):
         self.df = df
