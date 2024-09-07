@@ -8,7 +8,6 @@ from scripts.experience_analytics import ExperienceAnalytics
 class TestExperienceAnalytics(unittest.TestCase):
     def setUp(self):
         # Create a mock dataset for testing
-         # Create a mock dataset with missing values
         data = {
             'MSISDN/Number': [1, 2, 3, 4, 5],
             'TCP DL Retrans. Vol (Bytes)': [100, np.nan, 150, 200, 250],
@@ -59,20 +58,60 @@ class TestExperienceAnalytics(unittest.TestCase):
 
 
     def test_get_top_bottom_most_frequent(self):
+        # Call the method to get top, bottom, and most frequent TCP retransmission values
         top_tcp, bottom_tcp, most_freq_tcp = self.experience_analytics.get_top_bottom_most_frequent('TCP Retransmission')
-        # Adjusting the test to account for fewer values
-        self.assertIn(330.0, top_tcp.values)
-        self.assertIn(150.0, bottom_tcp.values)
+
+        # Filter out NaN values from top_tcp and bottom_tcp
+        top_tcp = top_tcp.dropna()
+        bottom_tcp = bottom_tcp.dropna()
+
+        # Convert the results to lists for easier comparison
+        top_tcp_list = top_tcp.tolist()  # Convert pandas Series to list
+        bottom_tcp_list = bottom_tcp.tolist()  # Convert pandas Series to list
+
+        # Verify that the top value is as expected (should be 330.0 in this case)
+        self.assertIn(330.0, top_tcp_list)  # Top value(s) should include 330.0
+
+        # Verify that the bottom value is as expected (should be 150.0 in this case)
+        self.assertIn(150.0, bottom_tcp_list)  # Bottom value(s) should include 150.0
+
+        # Verify that the most frequent value is 150.0 (appears twice in your mock data)
         self.assertEqual(most_freq_tcp, 150.0)
+        
+    def test_avg_throughput_per_handset(self):
+        avg_throughput = self.experience_analytics.avg_throughput_per_handset()
+
+        # Expected averages for each handset type
+        expected_avg_throughput = {
+            'iPhone': 1950.0,
+            'Samsung': 1700.0,
+            'Huawei': 1500.0
+        }
+
+        # Convert the DataFrame to a dictionary for easier comparison
+        throughput_dict = dict(zip(avg_throughput['Handset Type'], avg_throughput['Avg_Throughput']))
+
+        # Assert that each handset type's throughput is correctly calculated
+        for handset, expected_throughput in expected_avg_throughput.items():
+            self.assertAlmostEqual(throughput_dict.get(handset), expected_throughput, places=2)
+
 
     def test_k_means_clustering(self):
-        user_agg = self.experience_analytics.aggregate_user_experience()
+        # Specify the features to use for clustering
         features = ['TCP Retransmission', 'RTT', 'Throughput']
-        user_clusters = self.experience_analytics.k_means_clustering(user_agg, features, k=3)
-        # Test if clustering column is added
-        self.assertIn('Cluster', user_clusters.columns)
-        # Check if there are exactly 3 clusters
-        self.assertEqual(len(user_clusters['Cluster'].unique()), 3)
+
+        # Call the k-means clustering method
+        clustered_df, cluster_centers = self.experience_analytics.k_means_clustering(features, k=3)
+
+        # Test if the 'Cluster' column was added to the dataframe
+        self.assertIn('Cluster', clustered_df.columns)
+
+        # Test if there are exactly 3 unique clusters
+        self.assertEqual(len(clustered_df['Cluster'].unique()), 3)
+
+        # Check if the cluster centers have the correct number of features and clusters
+        self.assertEqual(cluster_centers.shape, (3, len(features) + 1))  # 3 clusters + 'Cluster' column
+
 
 if __name__ == '__main__':
     unittest.main(argv=[''], exit=False)

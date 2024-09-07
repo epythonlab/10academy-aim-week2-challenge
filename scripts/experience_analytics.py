@@ -44,17 +44,20 @@ class ExperienceAnalytics:
         return user_agg
 
     # Task 3.2: Compute top, bottom, and most frequent values
+    # Task 3.2: Compute top, bottom, and most frequent values
     def get_top_bottom_most_frequent(self, column):
         df = self.aggregate_user_experience()
         # Compute top 10 largest values
         top_10 = df[column].nlargest(10)
-    
+
         # Compute top 10 smallest values
         bottom_10 = df[column].nsmallest(10)
-        
-        most_frequent = df[column].mode()  # Most frequent value
 
-        return top_10,bottom_10, most_frequent
+        # Get the most frequent value (use the first one if there are multiple modes)
+        most_frequent = df[column].mode().iloc[0] if not df[column].mode().empty else None
+
+        return top_10, bottom_10, most_frequent
+
     
 
     def avg_throughput_per_handset(self):
