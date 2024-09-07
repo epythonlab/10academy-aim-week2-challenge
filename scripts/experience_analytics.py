@@ -11,23 +11,40 @@ class ExperienceAnalytics:
     def __init__(self, df):
         self.df = df
 
-    # Task 3.1: Aggregate per customer
     def aggregate_user_experience(self):
-        # Fill missing values with mean/mode
-        self.df['TCP Retransmission'].fillna(self.df['TCP Retransmission'].mean(), inplace=True)
-        self.df['RTT'].fillna(self.df['RTT'].mean(), inplace=True)
-        # self.df['Throughput'].fillna(self.df['Throughput'].mean(), inplace=True)
-        self.df['Handset Type'].fillna(self.df['Handset Type'].mode()[0], inplace=True)
+        # Fill missing values with mean/mode, avoiding chained assignment
+        self.df['TCP DL Retrans. Vol (Bytes)'] = self.df['TCP DL Retrans. Vol (Bytes)'].fillna(self.df['TCP DL Retrans. Vol (Bytes)'].mean())
+        self.df['TCP UL Retrans. Vol (Bytes)'] = self.df['TCP UL Retrans. Vol (Bytes)'].fillna(self.df['TCP UL Retrans. Vol (Bytes)'].mean())
+        self.df['Avg RTT DL (ms)'] = self.df['Avg RTT DL (ms)'].fillna(self.df['Avg RTT DL (ms)'].mean())
+        self.df['Avg RTT UL (ms)'] = self.df['Avg RTT UL (ms)'].fillna(self.df['Avg RTT UL (ms)'].mean())
+        self.df['Avg Bearer TP DL (kbps)'] = self.df['Avg Bearer TP DL (kbps)'].fillna(self.df['Avg Bearer TP DL (kbps)'].mean())
+        self.df['Avg Bearer TP UL (kbps)'] = self.df['Avg Bearer TP UL (kbps)'].fillna(self.df['Avg Bearer TP UL (kbps)'].mean())
+        self.df['Handset Type'] = self.df['Handset Type'].fillna(self.df['Handset Type'].mode()[0])
 
         # Group by customer (e.g., MSISDN/Number) and compute mean
         user_agg = self.df.groupby('MSISDN/Number').agg({
-            'TCP Retransmission': 'mean',
-            'RTT': 'mean',
-            # 'Throughput': 'mean',
-            'Handset Type': 'first'
+            'TCP DL Retrans. Vol (Bytes)': 'mean',
+            'TCP UL Retrans. Vol (Bytes)': 'mean',
+            'Avg RTT DL (ms)': 'mean',
+            'Avg RTT UL (ms)': 'mean',
+            'Avg Bearer TP DL (kbps)': 'mean',
+            'Avg Bearer TP UL (kbps)': 'mean',
+            'Handset Type': 'first'  # Taking the first as Handset Type is categorical
         }).reset_index()
 
+        # Compute combined fields for retransmission and RTT
+        user_agg['TCP Retransmission'] = user_agg['TCP DL Retrans. Vol (Bytes)'] + user_agg['TCP UL Retrans. Vol (Bytes)']
+        user_agg['RTT'] = (user_agg['Avg RTT DL (ms)'] + user_agg['Avg RTT UL (ms)']) / 2
+        user_agg['Throughput'] = (user_agg['Avg Bearer TP DL (kbps)'] + user_agg['Avg Bearer TP UL (kbps)']) / 2
+
+        # Dropping the intermediate columns
+        user_agg.drop(columns=['TCP DL Retrans. Vol (Bytes)', 'TCP UL Retrans. Vol (Bytes)',
+                            'Avg RTT DL (ms)', 'Avg RTT UL (ms)',
+                            'Avg Bearer TP DL (kbps)', 'Avg Bearer TP UL (kbps)'], inplace=True)
+
         return user_agg
+
+
 
     # Task 3.2: Top, bottom, and most frequent values
     def get_top_bottom_most_frequent(self, column):
