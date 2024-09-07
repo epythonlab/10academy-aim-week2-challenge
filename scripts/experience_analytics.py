@@ -16,14 +16,14 @@ class ExperienceAnalytics:
         # Fill missing values with mean/mode
         self.df['TCP Retransmission'].fillna(self.df['TCP Retransmission'].mean(), inplace=True)
         self.df['RTT'].fillna(self.df['RTT'].mean(), inplace=True)
-        self.df['Throughput'].fillna(self.df['Throughput'].mean(), inplace=True)
+        # self.df['Throughput'].fillna(self.df['Throughput'].mean(), inplace=True)
         self.df['Handset Type'].fillna(self.df['Handset Type'].mode()[0], inplace=True)
 
         # Group by customer (e.g., MSISDN/Number) and compute mean
         user_agg = self.df.groupby('MSISDN/Number').agg({
             'TCP Retransmission': 'mean',
             'RTT': 'mean',
-            'Throughput': 'mean',
+            # 'Throughput': 'mean',
             'Handset Type': 'first'
         }).reset_index()
 
