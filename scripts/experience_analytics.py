@@ -48,7 +48,7 @@ class ExperienceAnalytics:
         df = self.aggregate_user_experience()
         top_10 = df[column].nlargest(10)  # Top 10 largest values
         bottom_10 = df[column].nsmallest(10)  # Top 10 smallest values
-        most_frequent = df[column].mode()[0]  # Most frequent value
+        most_frequent = df[column].mode()  # Most frequent value
 
         # Convert to a DataFrame
         result_df = pd.DataFrame({
@@ -59,31 +59,40 @@ class ExperienceAnalytics:
 
         return result_df
 
-    # Task 3.3: Compute and report distribution of average throughput per handset type
-    def compute_average_throughput_per_handset(self):
-        # Calculate average throughput per handset type
+    def avg_throughput_per_handset(self):
         throughput_cols = ['Avg Bearer TP DL (kbps)', 'Avg Bearer TP UL (kbps)']
-        self.df['Average Throughput (kbps)'] = self.df[throughput_cols].mean(axis=1)
-
-        avg_throughput_per_handset = self.df.groupby('Handset Type')['Average Throughput (kbps)'].mean().reset_index()
-
+        self.df['Avg_Throughput'] = self.df[throughput_cols].mean(axis=1)
+        avg_throughput_per_handset = self.df.groupby('Handset Type')['Avg_Throughput'].mean().reset_index()
         return avg_throughput_per_handset
 
-    # Compute and report distribution of average TCP retransmission per handset type
-    def compute_average_tcp_retransmission_per_handset(self):
-        self.df['TCP Retransmission'] = self.df[['TCP DL Retrans. Vol (Bytes)', 'TCP UL Retrans. Vol (Bytes)']].sum(axis=1)
-        avg_tcp_retransmission_per_handset = self.df.groupby('Handset Type')['TCP Retransmission'].mean().reset_index()
-
+    def avg_tcp_rtt_per_handset(self):
+        self.df['TCP_Retransmission'] = self.df[['TCP DL Retrans. Vol (Bytes)', 'TCP UL Retrans. Vol (Bytes)']].sum(axis=1)
+        avg_tcp_retransmission_per_handset = self.df.groupby('Handset Type')['TCP_Retransmission'].mean().reset_index()
         return avg_tcp_retransmission_per_handset
 
-    # Task 3.3: Plot distribution per handset type
-    def plot_distribution(self, data, column, group_by):
-        df = data.groupby(group_by)[column].mean().reset_index()
-        sns.boxplot(x=group_by, y=column, data=df)
-        plt.title(f'Distribution of {column} per {group_by}')
+    def plot_distribution(self, metric):
+        '''
+        Plot the distribution of the specified metric
+        for the top 10 handsets by average throughput or
+        TCP retransmission
+        '''
+        # Compute average metric per handset type
+        if metric == 'Throughput':
+            avg_metric_per_handset = self.avg_throughput_per_handset()
+        elif metric == 'TCP Retransmission':
+            avg_metric_per_handset = self.avg_tcp_rtt_per_handset()
+        else:
+            raise ValueError("Metric must be 'Throughput' or 'TCP Retransmission'")
+        
+        # Get top 10 handsets by the specified metric
+        top_10_handsets = avg_metric_per_handset.sort_values(by=avg_metric_per_handset.columns[1], ascending=False).head(10)
+        
+        # Plot distribution for top 10 handsets
+        sns.barplot(x='Handset Type', y=avg_metric_per_handset.columns[1], data=top_10_handsets)
+        plt.title(f'Distribution of {metric} for Top 10 Handsets')
         plt.xticks(rotation=90)
         plt.show()
-
+        
     # Task 3.4: K-means clustering to segment users into experience groups
     def k_means_clustering(self, features, k=3):
         df = self.aggregate_user_experience()
@@ -96,5 +105,9 @@ class ExperienceAnalytics:
         kmeans = KMeans(n_clusters=k, random_state=42)
         df['Cluster'] = kmeans.fit_predict(scaled_features)
 
-        return df
+        # Cluster centers
+        cluster_centers = pd.DataFrame(scaler.inverse_transform(kmeans.cluster_centers_), columns=features)
+        cluster_centers['Cluster'] = range(k)
+
+        return df, cluster_centers
 
