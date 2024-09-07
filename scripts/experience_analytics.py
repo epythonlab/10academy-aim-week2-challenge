@@ -45,13 +45,13 @@ class ExperienceAnalytics:
         return user_agg
 
 
-
     # Task 3.2: Top, bottom, and most frequent values
     def get_top_bottom_most_frequent(self, column):
-        top_10 = self.df[column].nlargest(10)
-        bottom_10 = self.df[column].nsmallest(10)
-        most_frequent = self.df[column].mode()[0]
-
+        df = self.aggregate_user_experience()
+        top_10 = df[column].nlargest(10) # nlargest get top 10 
+        bottom_10 = df[column].nsmallest(10) # nsmallest get 10 smallest
+        most_frequent = df[column].mode()[0] # most frequent
+        
         return top_10, bottom_10, most_frequent
 
     # Task 3.3: Plot distributions per handset type

@@ -8,30 +8,62 @@ from scripts.experience_analytics import ExperienceAnalytics
 class TestExperienceAnalytics(unittest.TestCase):
     def setUp(self):
         # Create a mock dataset for testing
+         # Create a mock dataset with missing values
         data = {
             'MSISDN/Number': [1, 2, 3, 4, 5],
-            'TCP Retransmission': [0.1, 0.2, 0.3, np.nan, 0.4],
-            'RTT': [200, 300, 400, 500, np.nan],
-            'Throughput': [1000, 2000, np.nan, 1500, 2500],
-            'Handset Type': ['iPhone', 'Samsung', 'Huawei', np.nan, 'Samsung']
+            'TCP DL Retrans. Vol (Bytes)': [100, np.nan, 150, 200, 250],
+            'TCP UL Retrans. Vol (Bytes)': [50, 60, np.nan, 70, 80],
+            'Avg RTT DL (ms)': [100, 110, np.nan, 130, 140],
+            'Avg RTT UL (ms)': [60, 70, 65, np.nan, 85],
+            'Avg Bearer TP DL (kbps)': [2000, 2100, 2200, np.nan, 2300],
+            'Avg Bearer TP UL (kbps)': [1200, 1300, 1400, 1500, np.nan],
+            'Handset Type': ['iPhone', 'Samsung', np.nan, 'Huawei', 'iPhone']
         }
         self.df = pd.DataFrame(data)
         self.experience_analytics = ExperienceAnalytics(self.df)
 
     def test_aggregate_user_experience(self):
+        # Call the method being tested
         user_agg = self.experience_analytics.aggregate_user_experience()
-        # Check if missing values are filled and aggregation is correct
-        self.assertEqual(user_agg['TCP Retransmission'].isnull().sum(), 0)
-        self.assertEqual(user_agg['RTT'].isnull().sum(), 0)
-        self.assertEqual(user_agg['Throughput'].isnull().sum(), 0)
-        self.assertEqual(user_agg['Handset Type'].isnull().sum(), 0)
+
+        # Print aggregated results for debugging
+        print("Aggregated DataFrame:")
+        print(user_agg)
+
+        # Print expected results for debugging
+        expected_tcp_retransmission = [150.0, 235.0, 215.0, 270.0, 330.0]
+        expected_rtt = [80.0, 90.0, 92.5, 100.0, 112.5]
+        expected_throughput = [1600.0, 1700.0, 1800.0, 1825.0, 1825.0]
+
+
+        # Print expected results for debugging
+        print("Expected TCP Retransmission:")
+        print(expected_tcp_retransmission)
+        print("Expected RTT:")
+        print(expected_rtt)
+        print("Expected Throughput:")
+        print(expected_throughput)
+
+        # Test if the aggregated data matches the expected values
+        self.assertListEqual(user_agg['TCP Retransmission'].tolist(), expected_tcp_retransmission)
+        self.assertListEqual(user_agg['RTT'].tolist(), expected_rtt)
+        self.assertListEqual(user_agg['Throughput'].tolist(), expected_throughput)
+
+        # Test 4: Ensure intermediate columns are dropped
+        self.assertNotIn('TCP DL Retrans. Vol (Bytes)', user_agg.columns)
+        self.assertNotIn('TCP UL Retrans. Vol (Bytes)', user_agg.columns)
+        self.assertNotIn('Avg RTT DL (ms)', user_agg.columns)
+        self.assertNotIn('Avg RTT UL (ms)', user_agg.columns)
+        self.assertNotIn('Avg Bearer TP DL (kbps)', user_agg.columns)
+        self.assertNotIn('Avg Bearer TP UL (kbps)', user_agg.columns)
+
 
     def test_get_top_bottom_most_frequent(self):
         top_tcp, bottom_tcp, most_freq_tcp = self.experience_analytics.get_top_bottom_most_frequent('TCP Retransmission')
         # Adjusting the test to account for fewer values
-        self.assertIn(0.4, top_tcp.values)
-        self.assertIn(0.1, bottom_tcp.values)
-        self.assertEqual(most_freq_tcp, 0.1)
+        self.assertIn(330.0, top_tcp.values)
+        self.assertIn(150.0, bottom_tcp.values)
+        self.assertEqual(most_freq_tcp, 150.0)
 
     def test_k_means_clustering(self):
         user_agg = self.experience_analytics.aggregate_user_experience()
