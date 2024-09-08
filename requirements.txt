@@ -2,4 +2,6 @@ pytest
 matplotlib
 seaborn
 scikit-learn
+streamlit
+
 
