@@ -1,0 +1,73 @@
+# Streamlit dashboard script
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+import streamlit as st
+
+class HandsetVisualization:
+    def __init__(self):
+        pass
+
+    # Function to visualize top handsets side by side (DataFrame and chart)
+    def visualize_top_handsets(self, top_handsets, top_n):
+        st.write(f"### Top {top_n} Handsets")
+        
+        # Create two columns
+        col1, col2 = st.columns(2)
+        
+        # Display the DataFrame in the first column
+        with col1:
+            st.write(top_handsets)
+        
+        # Display the bar chart in the second column
+        with col2:
+            fig, ax = plt.subplots()
+            top_handsets.plot(kind='bar', ax=ax)
+            ax.set_ylabel('Count')
+            ax.set_title(f"Top {top_n} Handsets")
+            st.pyplot(fig)
+
+    # Function to visualize top manufacturers side by side (DataFrame and chart)
+    def visualize_top_manufacturers(self, top_manufacturers, top_n_manufacturers):
+        st.write(f"### Top {top_n_manufacturers} Manufacturers")
+        
+        # Create two columns
+        col1, col2 = st.columns(2)
+        
+        # Display the DataFrame in the first column
+        with col1:
+            st.write(top_manufacturers)
+        
+        # Display the bar chart in the second column
+        with col2:
+            fig, ax = plt.subplots()
+            top_manufacturers.plot(kind='bar', ax=ax)
+            ax.set_ylabel('Count')
+            ax.set_title(f"Top {top_n_manufacturers} Manufacturers")
+            st.pyplot(fig)
+
+    # Function to visualize top handsets for each manufacturer (DataFrame and chart)
+    def visualize_top_handsets_per_manufacturer(self, top_handsets_per_manufacturer, manufacturers, top_n_handsets):
+        for manufacturer, handsets in top_handsets_per_manufacturer.items():
+            st.write(f"### Top {top_n_handsets} Handsets for {manufacturer}")
+            
+            # Create two columns for the manufacturer-specific results
+            col1, col2 = st.columns(2)
+            
+            # Display the DataFrame in the first column
+            with col1:
+                st.write(handsets)
+            
+            # Display the bar chart in the second column
+            with col2:
+                fig, ax = plt.subplots()
+                
+                # Generate a color palette based on the number of handsets
+                colors = sns.color_palette("Set2", len(handsets))  # Set color palette
+                
+                # Plot the bar chart with individual bar colors
+                handsets.plot(kind='bar', ax=ax, color=colors, edgecolor='black')  # Use edgecolor for contrast
+                
+                ax.set_ylabel('Count')
+                ax.set_title(f"Top {top_n_handsets} Handsets for {manufacturer}")
+                st.pyplot(fig)
