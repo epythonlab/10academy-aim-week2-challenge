@@ -12,11 +12,13 @@ sys.path.append(os.path.abspath(os.path.join('..', 'scripts')))
 from experience_analytics import ExperienceAnalytics
 from handset_analysis import HandsetAnalysis
 from handset_dashboard import HandsetVisualization
+from user_engagement_dashboard import UserEngagementVisualizations
+from user_engagement_analysis import UserEngagementAnalysis
 
 # Load your data
 @st.cache_data
 def load_data():
-    df = pd.read_csv('xdr_cleaned.csv')
+    df = pd.read_csv('../Data/data/xdr_cleaned.csv')
     return df
 
             
@@ -39,18 +41,39 @@ def perform_clustering(analytics, agg, features, n_clusters):
 # Streamlit app
 def main():
     st.title("Telecom User & Handset Analytics Dashboard")
+    # Define a custom color palette
+    custom_colors = [
+    '#1f77b4',  # Blue
+    '#ff7f0e',  # Orange
+    '#2ca02c',  # Green
+    '#d62728',  # Red
+    '#9467bd',  # Purple
+    '#8c564b',  # Brown
+    '#e377c2',  # Pink
+    '#7f7f7f',  # Gray
+    '#bcbd22',  # Olive
+    '#17becf'   # Teal
+    ]
 
     # Load data
     df = load_data()
    # Initialize the analysis and visualization classes
     # df = load_data()
     handset_analysis = HandsetAnalysis(df)
-    handset_visualization = HandsetVisualization()
+    handset_visualization = HandsetVisualization(custom_colors)
     analytics = ExperienceAnalytics(df)
-
+    enga_analysis = UserEngagementAnalysis(df)
+    engagement_vis = UserEngagementVisualizations(df, custom_colors)
    
     st.sidebar.title("Navigation")
-    section = st.sidebar.radio("Go to", ["User Analysis", "K-Means Clustering", "Additional Visualizations"])
+    section = st.sidebar.radio(
+        "Go to", 
+        [
+            "User Analysis", "K-Means Clustering", 
+            "Engagement Analysis",
+            "Additional Visualizations"
+            ]
+        )
 
     # User Analysis Section
     if section == "User Analysis":
@@ -97,6 +120,61 @@ def main():
         if len(features) > 0:
             # Perform clustering and visualize the results
             perform_clustering(analytics, agg, features, n_clusters)
+
+    # Engagement Analysis Section
+    elif section == "Engagement Analysis":
+        st.subheader("User Engagement Analysis")
+
+        # Aggregate metrics for engagement
+        enga_analysis.aggregate_metrics()
+        
+        # Show top customers by different metrics
+        st.sidebar.subheader("Top Customers Metrics")
+        metric_choice = st.sidebar.selectbox(
+            "Select Metric for Top Customers",
+            ['sessions_frequency', 
+             'total_session_duration', 
+             'total_download_traffic', 
+             'total_upload_traffic']
+        )
+        top_customers = enga_analysis.report_top_customers()
+        metric_map = {
+            'sessions_frequency': top_customers[0],
+            'total_session_duration': top_customers[1],
+            'total_download_traffic': top_customers[2],
+            'total_upload_traffic': top_customers[3]
+        }
+        engagement_vis.plot_top_customers(metric_map[metric_choice], metric_choice)
+
+        # Elbow Method Visualization
+        if st.sidebar.button('Show Elbow Method'):
+            enga_analysis.normalize_and_cluster()
+            wcss = []
+            for i in range(1, 11):
+                kmeans = KMeans(n_clusters=i, random_state=42)
+                kmeans.fit(enga_analysis.normalized_metrics)
+                wcss.append(kmeans.inertia_)
+            engagement_vis.plot_elbow_method(wcss)
+
+        # Cluster Summary Visualization
+        if st.sidebar.button('Show Cluster Summary'):
+            enga_analysis.normalize_and_cluster(n_clusters=3)
+            cluster_summary = enga_analysis.cluster_summary()
+            engagement_vis.plot_cluster_summary(cluster_summary)
+            
+         # Top 3 apps used by customers
+        if st.sidebar.button('Show Top 3 Apps'):
+            # Define application traffic columns
+            applications = {
+                'YouTube': ['Youtube DL (Bytes)', 'Youtube UL (Bytes)'],
+                'Netflix': ['Netflix DL (Bytes)', 'Netflix UL (Bytes)'],
+                'Gaming': ['Gaming DL (Bytes)', 'Gaming UL (Bytes)'],
+                'Other': ['Other DL (Bytes)', 'Other UL (Bytes)']
+            }
+            app_total_traffic, top_10_engaged_per_app = enga_analysis.aggregate_traffic_per_application(applications=applications)
+            top_3_apps = app_total_traffic.nlargest(3, 'total_bytes')
+            engagement_vis.plot_top_applications(top_3_apps)
+         
 
     # Additional Visualizations Section
     elif section == "Additional Visualizations":

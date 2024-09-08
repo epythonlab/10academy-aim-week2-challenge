@@ -36,7 +36,9 @@ class UserEngagementAnalysis:
     def normalize_and_cluster(self, n_clusters=3):
         # Normalize the metrics
         scaler = StandardScaler()
-        self.normalized_metrics = scaler.fit_transform(self.metrics[['sessions_frequency', 'total_session_duration', 'total_download_traffic', 'total_upload_traffic']])
+        self.normalized_metrics = scaler.fit_transform(self.metrics[
+            ['sessions_frequency', 'total_session_duration', 
+             'total_download_traffic', 'total_upload_traffic']])
         
         # Perform K-means clustering
         self.kmeans = KMeans(n_clusters=n_clusters, random_state=42)
@@ -53,8 +55,7 @@ class UserEngagementAnalysis:
         return cluster_summary
 
     def aggregate_traffic_per_application(self, applications):
-        
-
+    
         app_traffic = pd.DataFrame()
 
         for app, columns in applications.items():

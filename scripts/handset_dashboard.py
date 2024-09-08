@@ -5,8 +5,11 @@ import matplotlib.pyplot as plt
 import streamlit as st
 
 class HandsetVisualization:
-    def __init__(self):
-        pass
+    
+    
+    def __init__(self, custom_colors):
+        self.custom_colors = custom_colors
+    
 
     # Function to visualize top handsets side by side (DataFrame and chart)
     def visualize_top_handsets(self, top_handsets, top_n):
@@ -22,7 +25,7 @@ class HandsetVisualization:
         # Display the bar chart in the second column
         with col2:
             fig, ax = plt.subplots()
-            top_handsets.plot(kind='bar', ax=ax)
+            top_handsets.plot(kind='bar', ax=ax, color=self.custom_colors)
             ax.set_ylabel('Count')
             ax.set_title(f"Top {top_n} Handsets")
             st.pyplot(fig)
@@ -41,9 +44,10 @@ class HandsetVisualization:
         # Display the bar chart in the second column
         with col2:
             fig, ax = plt.subplots()
-            top_manufacturers.plot(kind='bar', ax=ax)
+            top_manufacturers.plot(kind='bar', ax=ax, color=self.custom_colors)
             ax.set_ylabel('Count')
             ax.set_title(f"Top {top_n_manufacturers} Manufacturers")
+            plt.xticks(rotation=90)  # Rotate x labels for better readability
             st.pyplot(fig)
 
     # Function to visualize top handsets for each manufacturer (DataFrame and chart)
@@ -66,8 +70,9 @@ class HandsetVisualization:
                 colors = sns.color_palette("Set2", len(handsets))  # Set color palette
                 
                 # Plot the bar chart with individual bar colors
-                handsets.plot(kind='bar', ax=ax, color=colors, edgecolor='black')  # Use edgecolor for contrast
+                handsets.plot(kind='bar', ax=ax, color=self.custom_colors, edgecolor='black')  # Use edgecolor for contrast
                 
                 ax.set_ylabel('Count')
                 ax.set_title(f"Top {top_n_handsets} Handsets for {manufacturer}")
+                plt.xticks(rotation=90)  # Rotate x labels for better readability
                 st.pyplot(fig)
