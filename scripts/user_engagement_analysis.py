@@ -12,6 +12,7 @@ class UserEngagementAnalysis:
         self.metrics = None
         self.normalized_metrics = None
         self.kmeans = None
+        self.cluster_centers = None
 
     def aggregate_metrics(self):
         # Aggregate metrics per customer ID (MSISDN)
@@ -36,13 +37,17 @@ class UserEngagementAnalysis:
     def normalize_and_cluster(self, n_clusters=3):
         # Normalize the metrics
         scaler = StandardScaler()
-        self.normalized_metrics = scaler.fit_transform(self.metrics[
-            ['sessions_frequency', 'total_session_duration', 
-             'total_download_traffic', 'total_upload_traffic']])
+        features = ['sessions_frequency', 'total_session_duration', 
+                    'total_download_traffic', 'total_upload_traffic']
+        self.normalized_metrics = scaler.fit_transform(self.metrics[features])
         
         # Perform K-means clustering
         self.kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         self.metrics['cluster'] = self.kmeans.fit_predict(self.normalized_metrics)
+        # Cluster centers
+        self.cluster_centers = pd.DataFrame(scaler.inverse_transform(self.kmeans.cluster_centers_), columns=features)
+        self.cluster_centers['cluster'] = range(n_clusters)
+        
 
     def cluster_summary(self):
         # Compute min, max, average & total non-normalized metrics for each cluster
