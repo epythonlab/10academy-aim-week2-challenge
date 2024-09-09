@@ -25,7 +25,7 @@ except ImportError as e:
 # Load your data
 @st.cache_data
 def load_data():
-    df = pd.read_csv('../Data/data/xdr_cleaned.csv')
+    df = pd.read_csv('xdr_cleaned.csv')
     return df
 
             

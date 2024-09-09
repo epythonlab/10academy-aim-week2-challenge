@@ -11,8 +11,8 @@ from satisfaction_analytics import UserSatisfactionAnalytics
 # Load the data
 @st.cache_data
 def load_data():
-    engagement_scores = pd.read_csv('../Data/data/engagement_score.csv')
-    experience_scores = pd.read_csv('../Data/data/experience_score.csv')
+    engagement_scores = pd.read_csv('engagement_score.csv')
+    experience_scores = pd.read_csv('experience_score.csv')
     return engagement_scores, experience_scores
 
 # Initialize the UserSatisfactionAnalytics class
