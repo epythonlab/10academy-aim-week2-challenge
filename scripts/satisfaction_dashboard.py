@@ -11,8 +11,10 @@ from satisfaction_analytics import UserSatisfactionAnalytics
 # Load the data
 @st.cache_data
 def load_data():
-    engagement_scores = pd.read_csv('../test_data/engagement_score.csv')
-    experience_scores = pd.read_csv('../test_data/experience_score.csv')
+    data_url1 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/engagement_score.csv"
+    url2 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/experience_score.csv"
+    engagement_scores = pd.read_csv(data_url1)
+    experience_scores = pd.read_csv(url2)
     return engagement_scores, experience_scores
 
 # Initialize the UserSatisfactionAnalytics class
