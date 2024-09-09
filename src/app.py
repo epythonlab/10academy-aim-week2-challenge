@@ -182,7 +182,7 @@ def main():
     # Satisfaction Dashboard Section
     elif section == "User Satisfaction":
         satisfaction = SatisfactionDashboard(custom_colors)
-        satisfaction.satisfaction_dashboard()
+        satisfaction.show_satisfaction()
 
 if __name__ == "__main__":
     main()

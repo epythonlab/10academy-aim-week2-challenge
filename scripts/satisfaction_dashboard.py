@@ -75,7 +75,7 @@ class SatisfactionDashboard:
         ax.set_title('Clusters in PCA Space')
         st.pyplot(fig)
 
-    def satisfaction_dashboard(self):
+    def show_satisfaction(self):
         st.title('User Satisfaction Analytics Dashboard')
 
         st.header('Top Satisfied Customers')
