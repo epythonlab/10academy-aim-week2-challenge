@@ -71,7 +71,7 @@ def main():
         handset_analysis = HandsetAnalysis(df)
         handset_visualization = HandsetVisualization(custom_colors)
         analytics = ExperienceAnalytics(df)
-        satisfaction = SatisfactionDashboard(custom_colors)
+        
         
     except Exception as e:
         st.error(f"Error initializing classes: {e}")
@@ -181,6 +181,7 @@ def main():
 
     # Satisfaction Dashboard Section
     elif section == "User Satisfaction":
+        satisfaction = SatisfactionDashboard(custom_colors)
         satisfaction.satisfaction_dashboard()
 
 if __name__ == "__main__":
