@@ -14,7 +14,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 try:
     from scripts.experience_analytics import ExperienceAnalytics
     from scripts.handset_analysis import HandsetAnalysis
-    from scripts.user_engagement_analysis import UserEngagementAnalysis
+    # from scripts.user_engagement_analysis import UserEngagementAnalysis
     from scripts.handset_dashboard import HandsetVisualization
     from scripts.satisfaction_dashboard import satisfaction_dashboard
     from scripts.user_engagement_dashboard import UserEngagementVisualizations
@@ -134,9 +134,9 @@ def main():
     # Engagement Analysis Section
     elif section == "Engagement Analysis":
         st.subheader("User Engagement Analysis")
-        enga_analysis = UserEngagementAnalysis(df)
-        # Aggregate metrics for engagement
-        enga_analysis.aggregate_metrics()
+        # enga_analysis = UserEngagementAnalysis(df)
+        # # Aggregate metrics for engagement
+        # enga_analysis.aggregate_metrics()
         
         # Show top customers by different metrics
         st.sidebar.subheader("Top Customers Metrics")
@@ -147,14 +147,8 @@ def main():
              'total_download_traffic', 
              'total_upload_traffic']
         )
-        top_customers = enga_analysis.report_top_customers()
-        metric_map = {
-            'sessions_frequency': top_customers[0],
-            'total_session_duration': top_customers[1],
-            'total_download_traffic': top_customers[2],
-            'total_upload_traffic': top_customers[3]
-        }
-        engagement_vis.plot_top_customers(metric_map[metric_choice], metric_choice)
+    
+        engagement_vis.plot_top_customers(metric_choice)
 
         # Elbow Method Visualization
         if st.sidebar.button('Show Elbow Method'):
