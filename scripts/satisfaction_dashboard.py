@@ -6,8 +6,7 @@ from sklearn.decomposition import PCA
 from satisfaction_analytics import UserSatisfactionAnalytics
 
 class SatisfactionDashboard:
-    def __init__(self, custom_colors):
-        self.custom_colors = custom_colors
+    def __init__(self):
         # Initialization code
         self.data_url1 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/engagement_score.csv"
         self.url2 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/experience_score.csv"
@@ -75,7 +74,7 @@ class SatisfactionDashboard:
         ax.set_title('Clusters in PCA Space')
         st.pyplot(fig)
 
-    def show_satisfaction(self):
+    def show_satisfaction(self, custom_colors):
         st.title('User Satisfaction Analytics Dashboard')
 
         st.header('Top Satisfied Customers')
@@ -90,7 +89,7 @@ class SatisfactionDashboard:
         with col2:
             if not top_satisfied_customers.empty:
                 fig, ax = plt.subplots(figsize=(12, 6))
-                sns.barplot(data=top_satisfied_customers, x='MSISDN/Number', y='Satisfaction_Score', palette=self.custom_colors, ax=ax)
+                sns.barplot(data=top_satisfied_customers, x='MSISDN/Number', y='Satisfaction_Score', palette=custom_colors, ax=ax)
                 ax.set_xlabel('MSISDN/Number')
                 ax.set_ylabel('Satisfaction Score')
                 ax.set_title('Top Satisfied Customers')
