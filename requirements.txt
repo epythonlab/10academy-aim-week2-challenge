@@ -4,7 +4,6 @@ seaborn
 scikit-learn
 streamlit
 psycopg2
-pickle
 sqlalchemy
 
 
