@@ -75,6 +75,7 @@ def main():
         
     except Exception as e:
         st.error(f"Error initializing classes: {e}")
+        return  # Exit the function if initialization fails
 
     st.sidebar.title("Navigation")
     section = st.sidebar.radio(
@@ -148,7 +149,13 @@ def main():
         )
         
         top_customers = enga_analysis.report_top_customers()
-        engagement_vis.plot_top_customers(top_customers[metric_choice], metric_choice)
+        if metric_choice in top_customers.columns:
+            try:
+                engagement_vis.plot_top_customers(top_customers[metric_choice], metric_choice)
+            except Exception as e:
+                st.error(f"Error plotting top customers: {e}")
+        else:
+            st.error(f"Metric '{metric_choice}' is not available in the data.")
 
         # Elbow Method Visualization
         if st.sidebar.button('Show Elbow Method'):
