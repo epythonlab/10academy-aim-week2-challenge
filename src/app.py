@@ -16,7 +16,7 @@ try:
     from scripts.handset_analysis import HandsetAnalysis
     from scripts.user_engagement_analysis import UserEngagementAnalysis
     from scripts.handset_dashboard import HandsetVisualization
-    from scripts.satisfaction_dashboard import satisfaction_dashboard
+    from scripts.satisfaction_dashboard import SatisfactionDashboard
     from scripts.user_engagement_dashboard import UserEngagementVisualizations
 
     print("Modules imported successfully.")
@@ -71,6 +71,7 @@ def main():
         handset_analysis = HandsetAnalysis(df)
         handset_visualization = HandsetVisualization(custom_colors)
         analytics = ExperienceAnalytics(df)
+        satisfaction = SatisfactionDashboard()
         
     except Exception as e:
         st.error(f"Error initializing classes: {e}")
@@ -180,7 +181,7 @@ def main():
 
     # Satisfaction Dashboard Section
     elif section == "User Satisfaction Analytics":
-        satisfaction_dashboard(custom_colors)
+        satisfaction.satisfaction_dashboard(custom_colors)
 
 if __name__ == "__main__":
     main()
