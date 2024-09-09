@@ -14,12 +14,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 try:
     from scripts.experience_analytics import ExperienceAnalytics
     from scripts.handset_analysis import HandsetAnalysis
+    from scripts.user_engagement_analysis import UserEngagementAnalysis
     from scripts.handset_dashboard import HandsetVisualization
     from scripts.satisfaction_dashboard import satisfaction_dashboard
     from scripts.user_engagement_dashboard import UserEngagementVisualizations
-    from scripts.user_engagement_analysis import UserEngagementAnalysis
 
-    
     print("Modules imported successfully.")
 except ImportError as e:
     print(f"Error importing modules: {e}")
@@ -70,9 +69,9 @@ def main():
    # Initialize the analysis and visualization classes
     try:
         handset_analysis = HandsetAnalysis(df)
-        handset_visualization = HandsetVisualization(custom_colors)
         analytics = ExperienceAnalytics(df)
         enga_analysis = UserEngagementAnalysis(df)
+         handset_visualization = HandsetVisualization(custom_colors)
         engagement_vis = UserEngagementVisualizations(df, custom_colors)
     except Exception as e:
         st.error(f"Error initializing classes: {e}")
