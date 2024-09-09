@@ -7,17 +7,17 @@ import os
 import sys
 from sklearn.cluster import KMeans
 
-# Add the 'scripts' directory to the Python path
-sys.path.append(os.path.abspath(os.path.join('..', 'scripts')))
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import modules
 try:
-    from experience_analytics import ExperienceAnalytics
-    from handset_analysis import HandsetAnalysis
-    from handset_dashboard import HandsetVisualization
-    from satisfaction_dashboard import satisfaction_dashboard
-    from user_engagement_dashboard import UserEngagementVisualizations
-    from user_engagement_analysis import UserEngagementAnalysis
+    from scripts.experience_analytics import ExperienceAnalytics
+    from scripts.handset_analysis import HandsetAnalysis
+    from scripts.handset_dashboard import HandsetVisualization
+    from scripts.satisfaction_dashboard import satisfaction_dashboard
+    from scripts.user_engagement_dashboard import UserEngagementVisualizations
+    from scripts.user_engagement_analysis import UserEngagementAnalysis
     print("Modules imported successfully.")
 except ImportError as e:
     print(f"Error importing modules: {e}")
