@@ -69,9 +69,8 @@ def main():
    # Initialize the analysis and visualization classes
     try:
         handset_analysis = HandsetAnalysis(df)
-        analytics = ExperienceAnalytics(df)
-        enga_analysis = UserEngagementAnalysis(df)
         handset_visualization = HandsetVisualization(custom_colors)
+        analytics = ExperienceAnalytics(df)
         engagement_vis = UserEngagementVisualizations(df, custom_colors)
     except Exception as e:
         st.error(f"Error initializing classes: {e}")
@@ -80,7 +79,7 @@ def main():
     section = st.sidebar.radio(
         "Go to", 
         [
-            "User Analysis", "K-Means Clustering", 
+            "User Analysis", "User Experience", 
             "Engagement Analysis",
             "User Satisfaction Analytics"
             ]
@@ -113,7 +112,7 @@ def main():
 
 
     # K-Means Clustering Section
-    elif section == "K-Means Clustering":
+    elif section == "User Experience":
         st.subheader("User Experience Analytics")
 
         # Load aggregated data for clustering
@@ -135,7 +134,7 @@ def main():
     # Engagement Analysis Section
     elif section == "Engagement Analysis":
         st.subheader("User Engagement Analysis")
-
+        enga_analysis = UserEngagementAnalysis(df)
         # Aggregate metrics for engagement
         enga_analysis.aggregate_metrics()
         
