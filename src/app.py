@@ -71,7 +71,7 @@ def main():
         handset_analysis = HandsetAnalysis(df)
         analytics = ExperienceAnalytics(df)
         enga_analysis = UserEngagementAnalysis(df)
-         handset_visualization = HandsetVisualization(custom_colors)
+        handset_visualization = HandsetVisualization(custom_colors)
         engagement_vis = UserEngagementVisualizations(df, custom_colors)
     except Exception as e:
         st.error(f"Error initializing classes: {e}")
