@@ -71,7 +71,7 @@ def main():
         handset_analysis = HandsetAnalysis(df)
         handset_visualization = HandsetVisualization(custom_colors)
         analytics = ExperienceAnalytics(df)
-        engagement_vis = UserEngagementVisualizations(df, custom_colors)
+        
     except Exception as e:
         st.error(f"Error initializing classes: {e}")
    
@@ -147,6 +147,8 @@ def main():
         )
         
         top_customers = enga_analysis.report_top_customers()
+        engagement_vis = UserEngagementVisualizations(df, custom_colors)
+        
         engagement_vis.plot_top_customers(top_customers[metric_choice], metric_choice)
 
         # Elbow Method Visualization
