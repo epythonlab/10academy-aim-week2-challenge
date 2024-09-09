@@ -5,8 +5,11 @@ import pickle
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.metrics import mean_squared_error, r2_score
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from satisfaction_analytics import UserSatisfactionAnalytics
+from scripts.satisfaction_analytics import UserSatisfactionAnalytics
 
 # Load the data
 @st.cache_data
