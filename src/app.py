@@ -15,6 +15,7 @@ try:
     from experience_analytics import ExperienceAnalytics
     from handset_analysis import HandsetAnalysis
     from handset_dashboard import HandsetVisualization
+    from satisfaction_dashboard import satisfaction_dashboard
     from user_engagement_dashboard import UserEngagementVisualizations
     from user_engagement_analysis import UserEngagementAnalysis
     print("Modules imported successfully.")
@@ -77,7 +78,7 @@ def main():
         [
             "User Analysis", "K-Means Clustering", 
             "Engagement Analysis",
-            "Additional Visualizations"
+            "User Satisfaction Analytics"
             ]
         )
 
@@ -182,11 +183,9 @@ def main():
             engagement_vis.plot_top_applications(top_3_apps)
          
 
-    # Additional Visualizations Section
-    elif section == "Additional Visualizations":
-        st.subheader("Additional Data Visualizations")
-        # Add more visualizations here as needed
-        st.write("More visualizations coming soon!")
+    # Satisfaction Dashboard Section
+    elif section == "User Satisfaction Analytics":
+        satisfaction_dashboard(custom_colors)
 
 if __name__ == "__main__":
     main()
