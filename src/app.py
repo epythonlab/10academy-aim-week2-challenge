@@ -68,12 +68,14 @@ def main():
     # Load data
     df = load_data()
    # Initialize the analysis and visualization classes
-    # df = load_data()
-    handset_analysis = HandsetAnalysis(df)
-    handset_visualization = HandsetVisualization(custom_colors)
-    analytics = ExperienceAnalytics(df)
-    enga_analysis = UserEngagementAnalysis(df)
-    engagement_vis = UserEngagementVisualizations(df, custom_colors)
+    try:
+        handset_analysis = HandsetAnalysis(df)
+        handset_visualization = HandsetVisualization(custom_colors)
+        analytics = ExperienceAnalytics(df)
+        enga_analysis = UserEngagementAnalysis(df)
+        engagement_vis = UserEngagementVisualizations(df, custom_colors)
+    except Exception as e:
+        st.error(f"Error initializing classes: {e}")
    
     st.sidebar.title("Navigation")
     section = st.sidebar.radio(
