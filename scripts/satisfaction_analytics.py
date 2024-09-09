@@ -126,29 +126,37 @@ import numpy as np
 from sklearn.metrics import pairwise_distances
 
 class UserSatisfactionAnalytics:
-    def __init__(self, engagement_df, cluster_centers_df):
-        self.engagement_df = engagement_df
-        self.cluster_centers_df = cluster_centers_df
+    def __init__(self):
+        pass
 
-    def compute_engagement_score(self):
-        # Extract cluster centers as a numpy array
-        cluster_centers = self.cluster_centers_df.drop('cluster', axis=1).values
+    def compute_score(self, df, cluster_centers_df, features, score_column_name):
+        """
+        Generalized method to compute a score based on user metrics and cluster centers.
+
+        :param df: DataFrame containing user metrics.
+        :param cluster_centers_df: DataFrame containing cluster centers.
+        :param features: List of features to use for score computation.
+        :param score_column_name: Name of the score column to be added in the DataFrame.
+        :return: DataFrame with user ID and computed score.
+        """
+        # Extract cluster centers for the specified features
+        cluster_centers = cluster_centers_df[features].values
         
-        # List to hold engagement scores
-        engagement_scores = []
+        # List to hold computed scores
+        scores = []
 
-        # Compute engagement score for each user
-        for index, row in self.engagement_df.iterrows():
-            user_metrics = row[['total_session_duration', 'total_download_traffic', 'total_upload_traffic', 'sessions_frequency']].values
+        # Compute the score for each user by finding the minimum Euclidean distance to the cluster centers
+        for index, row in df.iterrows():
+            user_metrics = row[features].values
             distances = pairwise_distances([user_metrics], cluster_centers, metric='euclidean')
             min_distance = np.min(distances)
-            engagement_scores.append(min_distance)
+            scores.append(min_distance)
         
         # Add the scores to the DataFrame
-        self.engagement_df['Engagement_Score'] = engagement_scores
-        return self.engagement_df[['MSISDN/Number', 'Engagement_Score']]
-
-# # Example DataFrames (replace these with your actual data)
+        df[score_column_name] = scores
+        return df[['MSISDN/Number', score_column_name]]
+    
+    # # Example DataFrames (replace these with your actual data)
 # engagement_df = pd.DataFrame({
 #     'MSISDN/Number': ['user1', 'user2', 'user3'],
 #     'total_session_duration': [3e10, 2e10, 1.5e10],
