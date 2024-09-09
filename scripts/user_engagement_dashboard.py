@@ -3,7 +3,7 @@ import seaborn as sns
 import streamlit as st
 
 class UserEngagementVisualizations:
-
+    
     def __init__(self, data, custom_colors):
         self.data = data
         self.custom_colors = custom_colors
@@ -29,7 +29,7 @@ class UserEngagementVisualizations:
         # Display the plot
         st.pyplot(plt.gcf())
         plt.clf()  # Clear the figure for the next plot
-         
+
     def plot_elbow_method(self, wcss):
         # Plot the elbow method for optimal k
         plt.figure(figsize=(8, 5))
@@ -67,3 +67,4 @@ class UserEngagementVisualizations:
 
             # Show plot in Streamlit
             st.pyplot(fig)
+            plt.clf()  # Clear the figure for the next plot
