@@ -1,173 +1,175 @@
 # # scripts/satsfaction_analytics.py
 
-# import pandas as pd
-# import numpy as np
-# from sklearn.metrics import euclidean_distances
-# from sklearn.linear_model import LinearRegression
-# from sklearn.cluster import KMeans
-# from sklearn.preprocessing import StandardScaler
-# import psycopg2
-# from psycopg2 import sql
-# import pickle
-# import matplotlib.pyplot as plt
-
-# class UserSatisfactionAnalysis:
-#     def __init__(self, engagement_data, experience_data):
-#         self.engagement_data = engagement_data
-#         self.experience_data = experience_data
-#         self.satisfaction_data = None
-
-#     def calculate_scores(self, engagement_clusters, experience_clusters):
-#         # Assign engagement scores
-#         scaler_engagement = StandardScaler()
-#         engagement_features = scaler_engagement.fit_transform(self.engagement_data[['total_session_duration', 'total_download_traffic', 'total_upload_traffic']])
-#         engagement_data_with_scores = self.engagement_data.copy()
-#         engagement_data_with_scores['engagement_score'] = euclidean_distances(
-#             engagement_features, engagement_clusters.loc[0, ['total_session_duration', 'total_download_traffic', 'total_upload_traffic']]
-#         )
-
-#         # Assign experience scores
-#         scaler_experience = StandardScaler()
-#         experience_features = scaler_experience.fit_transform(self.experience_data[['TCP Retransmission', 'RTT', 'Throughput']])
-#         experience_data_with_scores = self.experience_data.copy()
-#         experience_data_with_scores['experience_score'] = euclidean_distances(
-#             experience_features, experience_clusters.loc[0, ['TCP Retransmission', 'RTT', 'Throughput']]
-#         )
-
-#         # Merge engagement and experience scores
-#         self.satisfaction_data = engagement_data_with_scores.merge(experience_data_with_scores, on='MSISDN/Number')
-#         self.satisfaction_data['satisfaction_score'] = (self.satisfaction_data['engagement_score'] + self.satisfaction_data['experience_score']) / 2
-
-#     def top_10_satisfied_customers(self):
-#         # Report top 10 satisfied customers
-#         return self.satisfaction_data.nlargest(10, 'satisfaction_score')
-
-#     def build_regression_model(self):
-#         # Prepare data for regression model
-#         X = self.satisfaction_data[['engagement_score', 'experience_score']]
-#         y = self.satisfaction_data['satisfaction_score']
-
-#         # Fit the regression model
-#         model = LinearRegression()
-#         model.fit(X, y)
-
-#         # Save the model
-#         with open('satisfaction_model.pkl', 'wb') as file:
-#             pickle.dump(model, file)
-
-#         return model
-
-#     def k_means_on_scores(self, k=2):
-#         # Apply K-means clustering on engagement and experience scores
-#         kmeans = KMeans(n_clusters=k, random_state=42)
-#         self.satisfaction_data['cluster'] = kmeans.fit_predict(self.satisfaction_data[['engagement_score', 'experience_score']])
-
-#         # Cluster summary
-#         cluster_summary = self.satisfaction_data.groupby('cluster').agg({
-#             'satisfaction_score': ['mean'],
-#             'experience_score': ['mean']
-#         }).reset_index()
-#         return cluster_summary
-
-#     def export_to_postgresql(self, host, database, user, password):
-#         # Export data to PostgreSQL
-#         try:
-#             connection = psycopg2.connect(
-#                 host=host,
-#                 database=database,
-#                 user=user,
-#                 password=password
-#             )
-#             cursor = connection.cursor()
-
-#             # Drop table if exists and create a new one
-#             cursor.execute('DROP TABLE IF EXISTS user_satisfaction_scores')
-#             cursor.execute('''
-#                 CREATE TABLE user_satisfaction_scores (
-#                     MSISDN VARCHAR(20),
-#                     engagement_score FLOAT,
-#                     experience_score FLOAT,
-#                     satisfaction_score FLOAT,
-#                     cluster INT
-#                 )
-#             ''')
-
-#             # Insert data into the table
-#             insert_query = '''
-#                 INSERT INTO user_satisfaction_scores (MSISDN, engagement_score, experience_score, satisfaction_score, cluster)
-#                 VALUES (%s, %s, %s, %s, %s)
-#             '''
-#             for _, row in self.satisfaction_data.iterrows():
-#                 cursor.execute(insert_query, (row['MSISDN/Number'], row['engagement_score'], row['experience_score'], row['satisfaction_score'], row['cluster']))
-            
-#             connection.commit()
-#         except Exception as e:
-#             print(f"Error: {e}")
-#         finally:
-#             if connection:
-#                 cursor.close()
-#                 connection.close()
-
-#     def model_deployment_tracking(self):
-#         # This function would include deployment and monitoring details
-#         # For demonstration, print dummy tracking information
-#         print("Model Deployment Tracking")
-#         print(f"Code Version: 1.0")
-#         print(f"Start Time: {pd.Timestamp.now()}")
-#         print(f"End Time: {pd.Timestamp.now()}")
-#         print(f"Source: satisfaction_model.pkl")
-#         print(f"Parameters: None")
-#         print(f"Metrics: Model Accuracy (Placeholder)")
-#         print(f"Artifacts: satisfaction_model.pkl")
-#         # You would need to implement actual Docker or MlOps tracking here
-
 import pandas as pd
 import numpy as np
 from sklearn.metrics import pairwise_distances
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import Ridge, Lasso, LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+import psycopg2
+from psycopg2 import sql
+import pickle
+import matplotlib.pyplot as plt
+from db_connect import conn
+
 
 class UserSatisfactionAnalytics:
-    def __init__(self, engagement_df, cluster_centers_df):
-        self.engagement_df = engagement_df
-        self.cluster_centers_df = cluster_centers_df
+    def __init__(self):
+        self.model = None
 
-    def compute_engagement_score(self):
-        # Extract cluster centers as a numpy array
-        cluster_centers = self.cluster_centers_df.drop('cluster', axis=1).values
-        
-        # List to hold engagement scores
-        engagement_scores = []
+    def compute_score(self, df, cluster_centers_df, features, score_column_name, target_cluster=None):
+        """
+        Generalized method to compute a score based on user metrics and a specific cluster center.
 
-        # Compute engagement score for each user
-        for index, row in self.engagement_df.iterrows():
-            user_metrics = row[['total_session_duration', 'total_download_traffic', 'total_upload_traffic', 'sessions_frequency']].values
-            distances = pairwise_distances([user_metrics], cluster_centers, metric='euclidean')
-            min_distance = np.min(distances)
-            engagement_scores.append(min_distance)
+        :param df: DataFrame containing user metrics.
+        :param cluster_centers_df: DataFrame containing cluster centers.
+        :param features: List of features to use for score computation.
+        :param score_column_name: Name of the score column to be added in the DataFrame.
+        :param target_cluster: The cluster number to compute the distance to (e.g., least engaged or worst experience).
+        :return: DataFrame with user ID and computed score.
+        """
+        # If a target cluster is provided, use its cluster center for the distance calculation
+        if target_cluster is not None:
+            target_cluster_center = cluster_centers_df[cluster_centers_df['cluster'] == target_cluster][features].values
+        else:
+            raise ValueError("Target cluster must be specified.")
+
+        # List to hold computed scores
+        scores = []
+
+        # Compute the score for each user by finding the Euclidean distance to the specified cluster center
+        for index, row in df.iterrows():
+            user_metrics = row[features].values
+            distance = pairwise_distances([user_metrics], target_cluster_center, metric='euclidean')[0][0]
+            scores.append(distance)
         
         # Add the scores to the DataFrame
-        self.engagement_df['Engagement_Score'] = engagement_scores
-        return self.engagement_df[['MSISDN/Number', 'Engagement_Score']]
+        df[score_column_name] = scores
+        return df[['MSISDN/Number', score_column_name]]
 
-# # Example DataFrames (replace these with your actual data)
-# engagement_df = pd.DataFrame({
-#     'MSISDN/Number': ['user1', 'user2', 'user3'],
-#     'total_session_duration': [3e10, 2e10, 1.5e10],
-#     'total_download_traffic': [1e8, 2e8, 1.5e8],
-#     'total_upload_traffic': [1e12, 2e12, 1.2e12],
-#     'sessions_frequency': [1e11, 2e11, 1.8e11]
-# })
+    
+    def compute_satisfaction_score(self, engagement_scores, experience_scores):
+        # Merge engagement and experience scores
+        merged_df = pd.merge(engagement_scores, experience_scores, on='MSISDN/Number')
 
-# cluster_centers_df = pd.DataFrame({
-#     'cluster': [0, 1, 2],
-#     'total_session_duration': [1e10, 2e10, 3e10],
-#     'total_download_traffic': [1e8, 2e8, 3e8],
-#     'total_upload_traffic': [1e12, 2e12, 3e12],
-#     'sessions_frequency': [1e11, 2e11, 3e11]
-# })
+        # Calculate satisfaction score as the average of engagement and experience scores
+        merged_df['Satisfaction_Score'] = (merged_df['Engagement_Score'] + merged_df['Experience_Score']) / 2      
 
-# # Initialize and compute engagement scores
-# calculator = EngagementScoreCalculator(engagement_df, cluster_centers_df)
-# engagement_scores_df = calculator.compute_engagement_score()
+        return merged_df
+    
+    def top_satisfied_customer(self, engagement_scores, experience_scores,top_n=10):
+        # Compute satisfaction scores
+        satisfaction_df = self.compute_satisfaction_score(engagement_scores, experience_scores)
+       # Sort by satisfaction score in descending order
+        sorted_df = satisfaction_df.sort_values(by='Satisfaction_Score', ascending=False)
 
-# # Display results
-# print(engagement_scores_df)
+        # Select top 10 satisfied customers
+        top_satisfied_customers = sorted_df.head(top_n)
+
+        return top_satisfied_customers[['MSISDN/Number', 'Satisfaction_Score']]
+    
+    def build_regression_model(self, engagement_df, experience_df, model_type='linenar'):
+        # Compute satisfaction scores
+        satisfaction_df = self.compute_satisfaction_score(engagement_df, experience_df)
+        
+        # Prepare data for regression model
+        X = satisfaction_df[['Engagement_Score', 'Experience_Score']]  # Features
+        y = satisfaction_df['Satisfaction_Score']  # Target variable
+        
+        # Split data into training and testing sets
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
+        # Initialize and train the model
+        
+        if model_type == 'rigde':
+            self.model = Ridge()
+        elif model_type == 'lasso':
+            self.model = Lasso()
+        else:
+            self.model = LinearRegression()
+        
+        # Train the model
+        self.model.fit(X_train, y_train)
+        
+        # Save the model
+        with open('satisfaction_model.pkl', 'wb') as file:
+            pickle.dump(self.model, file)
+            
+        # Make predictions
+        y_pred = self.model.predict(X_test)
+        
+        # Evaluate the model
+        mse = mean_squared_error(y_test, y_pred)
+        r2 = r2_score(y_test, y_pred)
+        
+        print(f"Mean Squared Error: {mse}")
+        print(f"R-squared: {r2}")
+        
+        return self.model
+    
+    def perform_clustering(self, engagement_score, experience_score, n_clusters=2):
+        """
+        Perform K-Means clustering on engagement and experience scores.
+
+        :param engagement_df: DataFrame with engagement scores.
+        :param experience_df: DataFrame with experience scores.
+        :param n_clusters: Number of clusters for K-Means.
+        :return: DataFrame with user IDs and their assigned cluster.
+        """
+        # Compute satisfaction score by merging together
+        cluster_df = self.compute_satisfaction_score(engagement_score, experience_score)
+
+        # Select features for clustering
+        features = cluster_df[['Engagement_Score', 'Experience_Score']]
+
+        # Initialize and fit the K-Means model
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+        cluster_df['Cluster'] = kmeans.fit_predict(features)
+       
+        
+        return cluster_df
+    
+    def export_to_postgresql(self, clustering_data):
+        try:
+            # Get SQLAlchemy engine using the conn function
+            engine = conn(db_name='telecom_model')  
+            connection = engine.raw_connection()
+            cursor = connection.cursor()
+
+            # Drop table if exists and create a new one
+            cursor.execute('DROP TABLE IF EXISTS user_satisfaction_scores')
+            cursor.execute('''
+                CREATE TABLE user_satisfaction_scores (
+                    MSISDN FLOAT,
+                    engagement_score FLOAT,
+                    experience_score FLOAT,
+                    satisfaction_score FLOAT
+                )
+            ''')
+
+            # Prepare the insert query
+            insert_query = '''
+                INSERT INTO user_satisfaction_scores (MSISDN, engagement_score, experience_score, satisfaction_score)
+                VALUES (%s, %s, %s, %s)
+            '''
+
+            # Convert numpy types to native Python types before insertion
+            data_to_insert = [
+                (float(row['MSISDN/Number']), float(row['Engagement_Score']), float(row['Experience_Score']), float(row['Satisfaction_Score']))
+                for _, row in clustering_data.iterrows()
+            ]
+            
+            # Insert the data
+            cursor.executemany(insert_query, data_to_insert)
+            
+            # Commit the transaction
+            connection.commit()
+
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()

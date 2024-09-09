@@ -16,15 +16,18 @@ class UserEngagementAnalysis:
 
     def aggregate_metrics(self):
         # Aggregate metrics per customer ID (MSISDN)
+         
         self.metrics = self.data.groupby('MSISDN/Number').agg({
             'Dur. (ms)': 'sum',                    # Total duration of sessions
             'Total DL (Bytes)': 'sum',             # Total download traffic
-            'Total UL (Bytes)': 'sum'              # Total upload traffic
+            'Total UL (Bytes)': 'sum',             # Total upload traffic
+            'MSISDN/Number': 'size'                # Session frequency (size counts rows per group)
+        }).rename(columns={
+            'Dur. (ms)': 'total_session_duration',
+            'Total DL (Bytes)': 'total_download_traffic',
+            'Total UL (Bytes)': 'total_upload_traffic',
+            'MSISDN/Number': 'sessions_frequency'
         }).reset_index()
-
-        # Rename columns for clarity
-        self.metrics.columns = ['MSISDN/Number', 'total_session_duration', 'total_download_traffic', 'total_upload_traffic']
-        self.metrics['sessions_frequency'] = self.data.groupby('MSISDN/Number').size().reset_index(name='session_id')['session_id']
 
     def report_top_customers(self):
         # Report the top 10 customers per engagement metric
