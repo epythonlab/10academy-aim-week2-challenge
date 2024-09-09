@@ -15,22 +15,6 @@ import matplotlib.pyplot as plt
 from db_connect import conn
 
 
-
-
-#     def model_deployment_tracking(self):
-#         # This function would include deployment and monitoring details
-#         # For demonstration, print dummy tracking information
-#         print("Model Deployment Tracking")
-#         print(f"Code Version: 1.0")
-#         print(f"Start Time: {pd.Timestamp.now()}")
-#         print(f"End Time: {pd.Timestamp.now()}")
-#         print(f"Source: satisfaction_model.pkl")
-#         print(f"Parameters: None")
-#         print(f"Metrics: Model Accuracy (Placeholder)")
-#         print(f"Artifacts: satisfaction_model.pkl")
-#         # You would need to implement actual Docker or MlOps tracking here
-
-
 class UserSatisfactionAnalytics:
     def __init__(self):
         self.model = None
@@ -189,17 +173,3 @@ class UserSatisfactionAnalytics:
             if connection:
                 cursor.close()
                 connection.close()
-
-    
-    def model_deployment_tracking(self):
-        # This function would include deployment and monitoring details
-        # For demonstration, print dummy tracking information
-        print("Model Deployment Tracking")
-        print(f"Code Version: 1.0")
-        print(f"Start Time: {pd.Timestamp.now()}")
-        print(f"End Time: {pd.Timestamp.now()}")
-        print(f"Source: satisfaction_model.pkl")
-        print(f"Parameters: None")
-        print(f"Metrics: Model Accuracy (Placeholder)")
-        print(f"Artifacts: satisfaction_model.pkl")
-        # You would need to implement actual Docker or MlOps tracking here
