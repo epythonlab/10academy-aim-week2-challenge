@@ -1,10 +1,12 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 import sys
 from sklearn.cluster import KMeans
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -24,10 +26,11 @@ except ImportError as e:
 # Load your data
 @st.cache_data
 def load_data():
-    data_url = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/xdr_cleaned.csv"
+    data_url = url = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/xdr_cleaned.csv"
     df = pd.read_csv(data_url)
     return df
 
+            
 # Create a function to perform K-Means clustering and visualize the results
 def perform_clustering(analytics, agg, features, n_clusters):
     clustered_df, cluster_centers_ = analytics.k_means_clustering(features, n_clusters)
@@ -49,33 +52,30 @@ def main():
     st.title("Telecom User & Handset Analytics Dashboard")
     # Define a custom color palette
     custom_colors = [
-        '#1f77b4',  # Blue
-        '#ff7f0e',  # Orange
-        '#2ca02c',  # Green
-        '#d62728',  # Red
-        '#9467bd',  # Purple
-        '#8c564b',  # Brown
-        '#e377c2',  # Pink
-        '#7f7f7f',  # Gray
-        '#bcbd22',  # Olive
-        '#17becf'   # Teal
+    '#1f77b4',  # Blue
+    '#ff7f0e',  # Orange
+    '#2ca02c',  # Green
+    '#d62728',  # Red
+    '#9467bd',  # Purple
+    '#8c564b',  # Brown
+    '#e377c2',  # Pink
+    '#7f7f7f',  # Gray
+    '#bcbd22',  # Olive
+    '#17becf'   # Teal
     ]
 
     # Load data
     df = load_data()
-
-    # Initialize the analysis and visualization classes
+   # Initialize the analysis and visualization classes
     try:
         handset_analysis = HandsetAnalysis(df)
         handset_visualization = HandsetVisualization(custom_colors)
         analytics = ExperienceAnalytics(df)
-        engagement_vis = UserEngagementVisualizations(df, custom_colors)
         satisfaction = SatisfactionDashboard(custom_colors)
         
     except Exception as e:
         st.error(f"Error initializing classes: {e}")
-        return  # Exit the function if initialization fails
-
+   
     st.sidebar.title("Navigation")
     section = st.sidebar.radio(
         "Go to", 
@@ -83,8 +83,8 @@ def main():
             "User Analysis", "User Experience", 
             "Engagement Analysis",
             "User Satisfaction"
-        ]
-    )
+            ]
+        )
 
     # User Analysis Section
     if section == "User Analysis":
@@ -98,7 +98,7 @@ def main():
         handset_visualization.visualize_top_handsets(top_handsets, top_n)
 
         # Top manufacturers visualization
-        top_n = st.slider("Number of top Manufacturers", 2, 10, 3)
+        top_n = st.slider("Number of top Manufacturer", 2, 10, 3)
         top_manufacturers = handset_analysis.top_manufacturers(top_n)
         handset_visualization.visualize_top_manufacturers(top_manufacturers, top_n)
 
@@ -110,6 +110,7 @@ def main():
             # Top handsets per manufacturer visualization
             top_handsets_per_manufacturer = handset_analysis.top_handsets_per_manufacturer(manufacturers)
             handset_visualization.visualize_top_handsets_per_manufacturer(top_handsets_per_manufacturer, manufacturers, top_n)
+
 
     # K-Means Clustering Section
     elif section == "User Experience":
@@ -131,8 +132,7 @@ def main():
             # Perform clustering and visualize the results
             perform_clustering(analytics, agg, features, n_clusters)
 
-    # Engagement Analysis Section
-    elif section == "Engagement Analysis":
+    if section == "Engagement Analysis":
         st.subheader("User Engagement Analysis")
         enga_analysis = UserEngagementAnalysis(df)
         enga_analysis.aggregate_metrics()
@@ -148,13 +148,9 @@ def main():
         )
         
         top_customers = enga_analysis.report_top_customers()
-        if metric_choice in top_customers.columns:
-            try:
-                engagement_vis.plot_top_customers(top_customers[metric_choice], metric_choice)
-            except Exception as e:
-                st.error(f"Error plotting top customers: {e}")
-        else:
-            st.error(f"Metric '{metric_choice}' is not available in the data.")
+        engagement_vis = UserEngagementVisualizations(df, custom_colors)
+        
+        engagement_vis.plot_top_customers(top_customers[metric_choice], metric_choice)
 
         # Elbow Method Visualization
         if st.sidebar.button('Show Elbow Method'):
@@ -185,7 +181,6 @@ def main():
 
     # Satisfaction Dashboard Section
     elif section == "User Satisfaction":
-        st.subheader("User Satisfaction Analytics")
         satisfaction.satisfaction_dashboard()
 
 if __name__ == "__main__":
