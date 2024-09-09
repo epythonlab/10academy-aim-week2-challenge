@@ -131,7 +131,7 @@ def main():
             # Perform clustering and visualize the results
             perform_clustering(analytics, agg, features, n_clusters)
 
-   if section == "Engagement Analysis":
+    if section == "Engagement Analysis":
         st.subheader("User Engagement Analysis")
         enga_analysis = UserEngagementAnalysis(df)
         enga_analysis.aggregate_metrics()
