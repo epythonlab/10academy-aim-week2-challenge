@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
@@ -186,6 +185,7 @@ def main():
 
     # Satisfaction Dashboard Section
     elif section == "User Satisfaction":
+        st.subheader("User Satisfaction Analytics")
         satisfaction.satisfaction_dashboard(custom_colors)
 
 if __name__ == "__main__":
