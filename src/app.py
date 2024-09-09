@@ -16,8 +16,8 @@ try:
     from scripts.handset_analysis import HandsetAnalysis
     from scripts.user_engagement_analysis import UserEngagementAnalysis
     from scripts.handset_dashboard import HandsetVisualization
-    from scripts.satisfaction_dashboard import SatisfactionDashboard
     from scripts.user_engagement_dashboard import UserEngagementVisualizations
+    from scripts.satisfaction_dashboard import SatisfactionDashboard
 
     print("Modules imported successfully.")
 except ImportError as e:
@@ -52,64 +52,65 @@ def main():
     st.title("Telecom User & Handset Analytics Dashboard")
     # Define a custom color palette
     custom_colors = [
-        '#1f77b4',  # Blue
-        '#ff7f0e',  # Orange
-        '#2ca02c',  # Green
-        '#d62728',  # Red
-        '#9467bd',  # Purple
-        '#8c564b',  # Brown
-        '#e377c2',  # Pink
-        '#7f7f7f',  # Gray
-        '#bcbd22',  # Olive
-        '#17becf'   # Teal
+    '#1f77b4',  # Blue
+    '#ff7f0e',  # Orange
+    '#2ca02c',  # Green
+    '#d62728',  # Red
+    '#9467bd',  # Purple
+    '#8c564b',  # Brown
+    '#e377c2',  # Pink
+    '#7f7f7f',  # Gray
+    '#bcbd22',  # Olive
+    '#17becf'   # Teal
     ]
 
     # Load data
     df = load_data()
-    
-    # Initialize the analysis and visualization classes
+   # Initialize the analysis and visualization classes
     try:
         handset_analysis = HandsetAnalysis(df)
         handset_visualization = HandsetVisualization(custom_colors)
         analytics = ExperienceAnalytics(df)
         satisfaction = SatisfactionDashboard()
+        
     except Exception as e:
         st.error(f"Error initializing classes: {e}")
-        return  # Exit if initialization fails
-
+   
     st.sidebar.title("Navigation")
     section = st.sidebar.radio(
         "Go to", 
         [
             "User Analysis", "User Experience", 
             "Engagement Analysis",
-            "User Satisfaction Analytics"
-        ]
-    )
+            "User Satisfaction"
+            ]
+        )
 
     # User Analysis Section
     if section == "User Analysis":
         st.subheader("User & Handset Analysis")
+        # Sidebar for interaction
         st.sidebar.title("Telecom Data Analysis")
-
+        
         # Top handsets visualization
-        top_n_handsets = st.slider("Number of top handsets to display", 5, 20, 10)
-        top_handsets = handset_analysis.top_handsets(top_n_handsets)
-        handset_visualization.visualize_top_handsets(top_handsets, top_n_handsets)
+        top_n = st.slider("Number of top handsets to display", 5, 20, 10)
+        top_handsets = handset_analysis.top_handsets(top_n)
+        handset_visualization.visualize_top_handsets(top_handsets, top_n)
 
         # Top manufacturers visualization
-        top_n_manufacturers = st.slider("Number of top Manufacturer", 2, 10, 3)
-        top_manufacturers = handset_analysis.top_manufacturers(top_n_manufacturers)
-        handset_visualization.visualize_top_manufacturers(top_manufacturers, top_n_manufacturers)
+        top_n = st.slider("Number of top Manufacturer", 2, 10, 3)
+        top_manufacturers = handset_analysis.top_manufacturers(top_n)
+        handset_visualization.visualize_top_manufacturers(top_manufacturers, top_n)
 
         # Display top handsets for each top manufacturer
         manufacturers = st.multiselect(
             "Select manufacturers", 
-            handset_analysis.top_manufacturers(top_n_manufacturers).index.tolist())
+            handset_analysis.top_manufacturers(top_n).index.tolist())
         if manufacturers:
             # Top handsets per manufacturer visualization
             top_handsets_per_manufacturer = handset_analysis.top_handsets_per_manufacturer(manufacturers)
-            handset_visualization.visualize_top_handsets_per_manufacturer(top_handsets_per_manufacturer, manufacturers, top_n_handsets)
+            handset_visualization.visualize_top_handsets_per_manufacturer(top_handsets_per_manufacturer, manufacturers, top_n)
+
 
     # K-Means Clustering Section
     elif section == "User Experience":
@@ -128,29 +129,27 @@ def main():
         n_clusters = st.sidebar.slider("Number of clusters", 2, 10, 3)
 
         if len(features) > 0:
-            # Initialize UserEngagementVisualizations
-            engagement_vis = UserEngagementVisualizations(df, custom_colors)
             # Perform clustering and visualize the results
             perform_clustering(analytics, agg, features, n_clusters)
 
-    elif section == "Engagement Analysis":
+    if section == "Engagement Analysis":
         st.subheader("User Engagement Analysis")
         enga_analysis = UserEngagementAnalysis(df)
         enga_analysis.aggregate_metrics()
-
+        
         # Show top customers by different metrics
         st.sidebar.subheader("Top Customers Metrics")
         metric_choice = st.sidebar.selectbox(
             "Select Metric for Top Customers",
             ['sessions_frequency', 
-             'total_session_duration', 
-             'total_download_traffic', 
-             'total_upload_traffic']
+            'total_session_duration', 
+            'total_download_traffic', 
+            'total_upload_traffic']
         )
-
+        
         top_customers = enga_analysis.report_top_customers()
         engagement_vis = UserEngagementVisualizations(df, custom_colors)
-
+        
         engagement_vis.plot_top_customers(top_customers[metric_choice], metric_choice)
 
         # Elbow Method Visualization
@@ -181,7 +180,7 @@ def main():
             engagement_vis.plot_top_applications(top_3_apps)
 
     # Satisfaction Dashboard Section
-    elif section == "User Satisfaction Analytics":
+    elif section == "User Satisfaction":
         satisfaction.satisfaction_dashboard(custom_colors)
 
 if __name__ == "__main__":
