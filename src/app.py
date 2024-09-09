@@ -14,7 +14,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 try:
     from scripts.experience_analytics import ExperienceAnalytics
     from scripts.handset_analysis import HandsetAnalysis
-    # from scripts.user_engagement_analysis import UserEngagementAnalysis
+    from scripts.user_engagement_analysis import UserEngagementAnalysis
     from scripts.handset_dashboard import HandsetVisualization
     from scripts.satisfaction_dashboard import satisfaction_dashboard
     from scripts.user_engagement_dashboard import UserEngagementVisualizations
@@ -131,24 +131,23 @@ def main():
             # Perform clustering and visualize the results
             perform_clustering(analytics, agg, features, n_clusters)
 
-    # Engagement Analysis Section
-    elif section == "Engagement Analysis":
+   if section == "Engagement Analysis":
         st.subheader("User Engagement Analysis")
-        # enga_analysis = UserEngagementAnalysis(df)
-        # # Aggregate metrics for engagement
-        # enga_analysis.aggregate_metrics()
+        enga_analysis = UserEngagementAnalysis(df)
+        enga_analysis.aggregate_metrics()
         
         # Show top customers by different metrics
         st.sidebar.subheader("Top Customers Metrics")
         metric_choice = st.sidebar.selectbox(
             "Select Metric for Top Customers",
             ['sessions_frequency', 
-             'total_session_duration', 
-             'total_download_traffic', 
-             'total_upload_traffic']
+            'total_session_duration', 
+            'total_download_traffic', 
+            'total_upload_traffic']
         )
-    
-        engagement_vis.plot_top_customers(metric_choice)
+        
+        top_customers = enga_analysis.report_top_customers()
+        engagement_vis.plot_top_customers(top_customers[metric_choice], metric_choice)
 
         # Elbow Method Visualization
         if st.sidebar.button('Show Elbow Method'):
@@ -163,12 +162,10 @@ def main():
         # Cluster Summary Visualization
         if st.sidebar.button('Show Cluster Summary'):
             enga_analysis.normalize_and_cluster(n_clusters=3)
-            cluster_summary = enga_analysis.cluster_summary()
-            engagement_vis.plot_cluster_summary(cluster_summary)
-            
-         # Top 3 apps used by customers
+            engagement_vis.plot_cluster_summary(enga_analysis.cluster_summary)
+
+        # Top 3 apps used by customers
         if st.sidebar.button('Show Top 3 Apps'):
-            # Define application traffic columns
             applications = {
                 'YouTube': ['Youtube DL (Bytes)', 'Youtube UL (Bytes)'],
                 'Netflix': ['Netflix DL (Bytes)', 'Netflix UL (Bytes)'],
@@ -176,9 +173,8 @@ def main():
                 'Other': ['Other DL (Bytes)', 'Other UL (Bytes)']
             }
             app_total_traffic, top_10_engaged_per_app = enga_analysis.aggregate_traffic_per_application(applications=applications)
-            top_3_apps = app_total_traffic.nlargest(3, 'total_bytes')
+            top_3_apps = top_10_engaged_per_app.groupby('application').sum().nlargest(3, 'total_bytes')
             engagement_vis.plot_top_applications(top_3_apps)
-         
 
     # Satisfaction Dashboard Section
     elif section == "User Satisfaction Analytics":
