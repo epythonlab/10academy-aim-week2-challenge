@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 8501
 
 # Run the Streamlit app
-CMD ["streamlit", "run", "src/app.py"]
+CMD ["python", "run", "scripts/satisfaction_analytics.py"]

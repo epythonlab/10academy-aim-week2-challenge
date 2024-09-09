@@ -6,7 +6,7 @@ import pandas as pd
 # Load environment variables from .env file
 load_dotenv()
 
-def conn():
+def conn(db_name=None):
     # Get database credentials from the .env file
     db_user = os.getenv('DB_USER')
     db_password = os.getenv('DB_PASSWORD')
