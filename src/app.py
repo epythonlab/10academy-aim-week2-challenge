@@ -148,7 +148,11 @@ def main():
         )
         
         top_customers = enga_analysis.report_top_customers()
-        engagement_vis.plot_top_customers(top_customers[metric_choice], metric_choice)
+        
+        if metric_choice in top_customers.columns:
+            engagement_vis.plot_top_customers(top_customers[metric_choice], metric_choice)
+        else:
+            st.error(f"Metric '{metric_choice}' is not available in the data.")
 
         # Elbow Method Visualization
         if st.sidebar.button('Show Elbow Method'):
