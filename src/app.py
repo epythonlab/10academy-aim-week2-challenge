@@ -181,8 +181,12 @@ def main():
 
     # Satisfaction Dashboard Section
     elif section == "User Satisfaction":
-        satisfaction = SatisfactionDashboard(custom_colors)
-        satisfaction.show_satisfaction()
+        try:
+            satisfaction = SatisfactionDashboard()  # Initialize without custom_colors
+            satisfaction.show_satisfaction(custom_colors)  # Pass custom_colors to the method
+        except Exception as e:
+            st.error(f"Error initializing SatisfactionDashboard: {e}")
+
 
 if __name__ == "__main__":
     main()
