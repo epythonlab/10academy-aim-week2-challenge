@@ -3,23 +3,21 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
-import pickle
-
 from satisfaction_analytics import UserSatisfactionAnalytics
 
 class SatisfactionDashboard:
+    def __init__(self):
+        # Initialization code
+        self.data_url1 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/engagement_score.csv"
+        self.url2 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/experience_score.csv"
 
-    @staticmethod
-    @st.cache_data
-    def load_data():
-        data_url1 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/engagement_score.csv"
-        url2 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/experience_score.csv"
-        engagement_scores = pd.read_csv(data_url1)
-        experience_scores = pd.read_csv(url2)
+    def load_data(self):
+        # Load data from URLs
+        engagement_scores = pd.read_csv(self.data_url1)
+        experience_scores = pd.read_csv(self.url2)
         return engagement_scores, experience_scores
 
-    @staticmethod
-    def plot_regression_results(X, y, model):
+    def plot_regression_results(self, X, y, model):
         st.subheader('Regression Analysis')
 
         def plot_regression(x, y, y_pred, xlabel, ylabel, title, color):
@@ -46,8 +44,7 @@ class SatisfactionDashboard:
         ax.set_title('Residuals Plot')
         st.pyplot(fig)
 
-    @staticmethod
-    def plot_cluster_results(cluster_df, n_clusters):
+    def plot_cluster_results(self, cluster_df, n_clusters):
         st.subheader('Clustering Analysis')
 
         st.write('### Cluster Distribution')
