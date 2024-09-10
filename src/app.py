@@ -195,12 +195,13 @@ def main():
 
     # Satisfaction Dashboard Section
     elif section == "User Satisfaction":
-        try:
-            satisfaction = SatisfactionDashboard(custom_colors)
-            # Initialize with custom_colors
-            satisfaction.show_satisfaction()  # No need to pass custom_colors again
-        except Exception as e:
-            st.error(f"Error initializing SatisfactionDashboard: {e}")
+        st.write('User Satisfaction Dashboard Under Development...')
+        # try:
+        #     satisfaction = SatisfactionDashboard(custom_colors)
+        #     # Initialize with custom_colors
+        #     satisfaction.show_satisfaction()  # No need to pass custom_colors again
+        # except Exception as e:
+        #     st.error(f"Error initializing SatisfactionDashboard: {e}")
 
 if __name__ == "__main__":
     main()
