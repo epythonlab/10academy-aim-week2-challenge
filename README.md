@@ -28,28 +28,33 @@ The project structure is organized to support reproducible and scalable data pro
 ├── Dockerfile                        # Instructions to build a Docker image
 ├── scripts/
 │   ├── __init__.py
-│   ├── data_preparation.py           # Script for data cleaning and preparation
-│   ├── eda_pipeline.py               # EDA steps implemented using scikit-learn pipeline
-│   ├── feature_store.py              # Code for interacting with SQL database
-│   ├── models.py                     # Machine learning models and training scripts
-│   ├── dashboard.py                  # Streamlit dashboard script
-│   ├── utils.py                      # Utility functions
+│   ├── data_processing.py           # Script for data cleaning and processing
+│   ├── db_connect.py                # Script for database connection engine
+│   ├── eda_pipeline.py              # EDA steps implemented 
+│   ├── experience_analytics.py      # User experience analytics module
+│   ├── handset_analysis.py          # Handset analysis module
+│   ├── habdset_dashboard.py         # Streamlit dashboard for visualizing top handsets
+│   ├── satisfaction_analytics.py     # Machine learning models and training scripts for predicting satisfaction score
+│   ├── satisfaction_dashabord.py     # Streamlit dashboard script
+│   ├── user_analysis.py               # User analysis functions
+│   ├── user_engagement_analysis.py     # User engagement analytics module
+│   ├── user_engagement_dashboard.py     # User engagement dashboard module
 ├── notebooks/
 │   ├── __init__.py
-│   ├── exploratory_analysis.ipynb    # Jupyter notebook for initial EDA and analysis
-│   ├── model_training.ipynb          # Jupyter notebook for model training and evaluation
+│   ├── experience_analysis.ipynb    # Jupyter notebook for user experience analysis
+│   ├── user_analaysis_notebook.ipynb          # Jupyter notebook for user and handset analysis
+│   ├── user_engagement_notebook.ipynb          # Jupyter notebook for user engagement analysis
+│   ├── usersatisfaction_analytics_notebook.ipynb          # Jupyter notebook for user satisfaction score prediction
 │   ├── README.md                     # Description of notebooks
 ├── tests/
 │   ├── __init__.py
-│   ├── test_data_preparation.py      # Unit tests for data preparation module
+│   ├── test_user_engagement_analysis.py      # Unit tests for user engagement module
+│   ├── test_user_analysis.py         # Unit tests for user analysis module
+│   ├── test_handset_analysis.py      # Unit tests for handset analysis module
+│   ├── test_experience_analytics.py  # Unit tests for user experience module
 │   ├── test_eda_pipeline.py          # Unit tests for EDA pipeline module
-│   ├── test_feature_store.py         # Unit tests for SQL feature store interactions
-│   ├── test_models.py                # Unit tests for models and training scripts
-│   ├── test_dashboard.py             # Unit tests for Streamlit dashboard
+│   
 └── src/
     ├── __init__.py
-    ├── data_preparation_script.py    # Script for running data preparation independently
-    ├── eda_pipeline_script.py        # Script for running EDA pipeline independently
-    ├── model_training_script.py      # Script for running model training independently
-    ├── dashboard_deploy.py           # Script for deploying Streamlit dashboard
+    ├── app.py    # Script for running streamlit dashboard
     └── README.md                     # Description of scripts
