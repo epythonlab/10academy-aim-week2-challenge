@@ -5,6 +5,7 @@ scikit-learn
 streamlit
 psycopg2-binary
 sqlalchemy
+mlflow
 
 
 
