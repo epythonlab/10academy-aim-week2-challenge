@@ -16,7 +16,7 @@ try:
     from scripts.user_engagement_analysis import UserEngagementAnalysis
     from scripts.handset_dashboard import HandsetVisualization
     from scripts.user_engagement_dashboard import UserEngagementVisualizations
-    from scripts.satisfaction_dashboard import SatisfactionDashboard
+    # from scripts.satisfaction_dashboard import SatisfactionDashboard
 
     print("Modules imported successfully.")
 except ImportError as e:
