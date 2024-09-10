@@ -19,7 +19,6 @@ class SatisfactionDashboard:
         self.data_url1 = "https://drive.google.com/uc?export=download&id=1tkFPClCpd5d-DX2qKH-wkhazSKAfXQfC"
         self.url2 = "https://drive.google.com/uc?export=download&id=1vTGWlpVY1w6gveKGmqPkJ1Hg08kkc8xh"
        
-    
     def load_data(self):
         """
         Load engagement and experience scores from the local files.
