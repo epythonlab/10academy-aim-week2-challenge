@@ -17,7 +17,7 @@ try:
     from scripts.user_engagement_analysis import UserEngagementAnalysis
     from scripts.handset_dashboard import HandsetVisualization
     from scripts.user_engagement_dashboard import UserEngagementVisualizations
-    from scripts.satisfaction_dashboard import SatisfactionDashboard
+    from satisfaction_dashboard import SatisfactionDashboard
 
     print("Modules imported successfully.")
 except ImportError as e:
@@ -71,7 +71,6 @@ def main():
         handset_analysis = HandsetAnalysis(df)
         handset_visualization = HandsetVisualization(custom_colors)
         analytics = ExperienceAnalytics(df)
-        
         
     except Exception as e:
         st.error(f"Error initializing classes: {e}")
