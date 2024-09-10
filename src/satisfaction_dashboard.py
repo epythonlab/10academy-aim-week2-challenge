@@ -6,37 +6,53 @@ from sklearn.decomposition import PCA
 from scripts.satisfaction_analytics import UserSatisfactionAnalytics
 
 class SatisfactionDashboard:
-    def __init__(self):
-        # Initialization code
+    def __init__(self, custom_colors):
+        """
+        Initialize the SatisfactionDashboard with custom colors.
+        """
+        self.custom_colors = custom_colors
         self.data_url1 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/engagement_score.csv"
         self.url2 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/experience_score.csv"
 
     def load_data(self):
-        # Load data from URLs
+        """
+        Load engagement and experience scores from the URLs.
+        """
         engagement_scores = pd.read_csv(self.data_url1)
         experience_scores = pd.read_csv(self.url2)
         return engagement_scores, experience_scores
 
     def plot_regression_results(self, X, y, model):
+        """
+        Plot regression results including regression lines and residuals.
+        """
         st.subheader('Regression Analysis')
 
-        def plot_regression(x, y, y_pred, xlabel, ylabel, title, color):
-            fig, ax = plt.subplots(figsize=(10, 6))
-            sns.scatterplot(x=x, y=y, ax=ax, label='Actual vs Satisfaction')
-            sns.lineplot(x=x, y=y_pred, color=color, ax=ax, label='Fitted Line')
-            ax.set_xlabel(xlabel)
-            ax.set_ylabel(ylabel)
-            ax.set_title(title)
-            ax.legend()
-            st.pyplot(fig)
-
+        # Predict using the model
         y_pred = model.predict(X)
-        plot_regression(X['Engagement_Score'], y, y_pred, 'Engagement Score', 'Satisfaction Score', 'Regression Line Plot for Engagement Score', 'red')
-        plot_regression(X['Experience_Score'], y, y_pred, 'Experience Score', 'Satisfaction Score', 'Regression Line Plot for Experience Score', 'blue')
+
+        # Create a single plot for both features
+        fig, ax = plt.subplots(figsize=(12, 8))
+
+        # Scatter plots for actual values
+        sns.scatterplot(x=X['Engagement_Score'], y=y, ax=ax, color='blue', label='Actual vs Satisfaction (Engagement)')
+        sns.scatterplot(x=X['Experience_Score'], y=y, ax=ax, color='green', label='Actual vs Satisfaction (Experience)')
+
+        # Regression lines for both features
+        sns.lineplot(x=X['Engagement_Score'], y=y_pred, color='red', label='Fitted Line (Engagement)')
+        sns.lineplot(x=X['Experience_Score'], y=y_pred, color='orange', label='Fitted Line (Experience)')
+
+        # Plot settings
+        ax.set_xlabel('Scores')
+        ax.set_ylabel('Satisfaction Score')
+        ax.set_title('Regression Line Plot for Engagement and Experience Scores')
+        ax.legend()
+
+        st.pyplot(fig)
 
         st.write('### Residuals Plot')
         residuals = y - y_pred
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(12, 8))
         sns.scatterplot(x=y_pred, y=residuals, ax=ax)
         ax.axhline(0, color='red', linestyle='--')
         ax.set_xlabel('Fitted Values')
@@ -45,6 +61,9 @@ class SatisfactionDashboard:
         st.pyplot(fig)
 
     def plot_cluster_results(self, cluster_df, n_clusters):
+        """
+        Plot clustering results including cluster distribution, centroids, and PCA plot.
+        """
         st.subheader('Clustering Analysis')
 
         st.write('### Cluster Distribution')
@@ -74,7 +93,10 @@ class SatisfactionDashboard:
         ax.set_title('Clusters in PCA Space')
         st.pyplot(fig)
 
-    def show_satisfaction(self, custom_colors):
+    def show_satisfaction(self):
+        """
+        Display the user satisfaction analytics dashboard.
+        """
         st.title('User Satisfaction Analytics Dashboard')
 
         st.header('Top Satisfied Customers')
@@ -89,7 +111,7 @@ class SatisfactionDashboard:
         with col2:
             if not top_satisfied_customers.empty:
                 fig, ax = plt.subplots(figsize=(12, 6))
-                sns.barplot(data=top_satisfied_customers, x='MSISDN/Number', y='Satisfaction_Score', palette=custom_colors, ax=ax)
+                sns.barplot(data=top_satisfied_customers, x='MSISDN/Number', y='Satisfaction_Score', palette=self.custom_colors, ax=ax)
                 ax.set_xlabel('MSISDN/Number')
                 ax.set_ylabel('Satisfaction Score')
                 ax.set_title('Top Satisfied Customers')
@@ -105,7 +127,8 @@ class SatisfactionDashboard:
             st.write(f"Model Type: {model_type.capitalize()}")
             st.write("Mean Squared Error and R-squared values are printed in the console.")
             satisfaction_df = analytics.compute_satisfaction_score(engagement_scores, experience_scores)
-            self.plot_regression_results(satisfaction_df[['Engagement_Score', 'Experience_Score']], satisfaction_df['Satisfaction_Score'], model)
+            self.plot_regression_results(satisfaction_df[['Engagement_Score', 'Experience_Score']], 
+                                         satisfaction_df['Satisfaction_Score'], model)
 
         st.header('Clustering')
         n_clusters = st.slider('Select number of clusters', min_value=2, max_value=10, value=2)
