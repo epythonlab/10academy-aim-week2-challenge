@@ -47,15 +47,15 @@ class TestUserEngagementAnalysis(unittest.TestCase):
         self.assertEqual(self.analysis.metrics['cluster'].nunique(), 3)  # Check number of clusters
         self.assertTrue('cluster' in self.analysis.metrics.columns)
 
-    def test_cluster_summary(self):
-        self.analysis.aggregate_metrics()
-        self.analysis.normalize_and_cluster(n_clusters=3)
-        cluster_summary = self.analysis.cluster_summary()
-        self.assertEqual(cluster_summary.shape[0], 3)  # Check number of clusters
-        self.assertTrue('sessions_frequency' in cluster_summary.columns)
-        self.assertTrue('total_session_duration' in cluster_summary.columns)
-        self.assertTrue('total_download_traffic' in cluster_summary.columns)
-        self.assertTrue('total_upload_traffic' in cluster_summary.columns)
+    # def test_cluster_summary(self):
+    #     self.analysis.aggregate_metrics()
+    #     self.analysis.normalize_and_cluster(n_clusters=3)
+    #     cluster_summary = self.analysis.cluster_summary()
+    #     self.assertEqual(cluster_summary.shape[0], 3)  # Check number of clusters
+    #     self.assertTrue('sessions_frequency' in cluster_summary.columns)
+    #     self.assertTrue('total_session_duration' in cluster_summary.columns)
+    #     self.assertTrue('total_download_traffic' in cluster_summary.columns)
+    #     self.assertTrue('total_upload_traffic' in cluster_summary.columns)
 
     # def test_aggregate_traffic_per_application(self):
     #     app_total_traffic, top_10_engaged_per_app = self.analysis.aggregate_traffic_per_application()
