@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pandas as pd
 import streamlit as st
 
 class UserEngagementVisualizations:
@@ -8,16 +9,18 @@ class UserEngagementVisualizations:
         self.data = data
         self.custom_colors = custom_colors
 
-    def plot_top_customers(self, top_customers, metric_name):
-        # Plot top customers for a given metric
-        plt.figure(figsize=(12, 6))
-        sns.barplot(x='MSISDN/Number', y=metric_name, data=top_customers.reset_index(drop=True), palette=self.custom_colors)
-        plt.title(f'Top 10 Customers by {metric_name}')
-        plt.xlabel('Customer ID (MSISDN/Number)')
-        plt.ylabel(metric_name)
-        plt.xticks(rotation=90)  # Rotate x labels for better readability
-        st.pyplot(plt.gcf())
-        plt.clf()  # Clear the figure for the next plot
+    def plot_top_customers(self, data, metric_name):
+        if isinstance(data, pd.DataFrame) and metric_name in data.columns:
+            fig, ax = plt.subplots(figsize=(12, 6))
+            sns.barplot(data=data, x='MSISDN/Number', y=metric_name, palette=self.custom_colors, ax=ax)
+            ax.set_xlabel('Customer')
+            ax.set_ylabel(metric_name)
+            ax.set_title(f'Top Customers by {metric_name}')
+            plt.xticks(rotation=90)
+            st.pyplot(fig)
+        else:
+            st.error("Invalid data format or metric name for plotting.")
+            
         
     def plot_top_applications(self, top_3_apps):
         # Plot the top 3 most used applications
@@ -41,22 +44,33 @@ class UserEngagementVisualizations:
         plt.clf()  # Clear the figure for the next plot
 
     def plot_cluster_summary(self, cluster_summary):
-        # Visualizing each metric separately
+        # Check if cluster_summary is a DataFrame
+        if not isinstance(cluster_summary, pd.DataFrame):
+            st.error("Cluster summary data is not available.")
+            return
+
+        # Ensure 'cluster' column is in the DataFrame
+        if 'cluster_' not in cluster_summary.columns:
+            st.error("'cluster_' column is missing from cluster summary data.")
+            return
+
         metrics = ['sessions_frequency', 'total_session_duration', 'total_download_traffic', 'total_upload_traffic']
-      
-        # Iterate through each metric
+        
         for metric in metrics:
-            fig, ax = plt.subplots(figsize=(12, 6))
-    
-            # Select rows corresponding to the current metric and transpose
-            met = cluster_summary[metric].T.reset_index()
-            met.columns = ['Summary Statistic', 'Cluster 0', 'Cluster 1', 'Cluster 2']
-                      
-            # Melt DataFrame to long format for seaborn
-            met_long = met.melt(id_vars='Summary Statistic', var_name='Cluster', value_name='Value')
-                  
+            # Filter columns related to the current metric
+            metric_columns = [col for col in cluster_summary.columns if col.startswith(f"{metric}_")]
+            
+            if not metric_columns:
+                st.error(f"No data available for {metric}.")
+                continue
+            
+            # Select columns related to the current metric and reset index
+            met = cluster_summary[['cluster_'] + metric_columns].set_index('cluster_').reset_index()
+            met = met.melt(id_vars='cluster_', var_name='Summary Statistic', value_name='Value')
+            
             # Plot using seaborn
-            sns.barplot(x='Summary Statistic', y='Value', hue='Cluster', data=met_long, ax=ax)
+            fig, ax = plt.subplots(figsize=(12, 6))
+            sns.barplot(x='Summary Statistic', y='Value', hue='cluster_', data=met, ax=ax)
             
             ax.set_title(f'Cluster Summary for {metric.replace("_", " ").capitalize()}')
             ax.set_xlabel('Summary Statistic')

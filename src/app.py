@@ -7,7 +7,6 @@ import os
 import sys
 from sklearn.cluster import KMeans
 
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import modules
@@ -17,7 +16,7 @@ try:
     from scripts.user_engagement_analysis import UserEngagementAnalysis
     from scripts.handset_dashboard import HandsetVisualization
     from scripts.user_engagement_dashboard import UserEngagementVisualizations
-    from satisfaction_dashboard import SatisfactionDashboard
+    from scripts.satisfaction_dashboard import SatisfactionDashboard
 
     print("Modules imported successfully.")
 except ImportError as e:
@@ -26,11 +25,12 @@ except ImportError as e:
 # Load your data
 @st.cache_data
 def load_data():
-    data_url = url = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/xdr_cleaned.csv"
+    # data_url = "test_data/xdr_cleaned.csv"
+    self.data_url1 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/xdr_cleaned.csv"
+      
     df = pd.read_csv(data_url)
     return df
 
-            
 # Create a function to perform K-Means clustering and visualize the results
 def perform_clustering(analytics, agg, features, n_clusters):
     clustered_df, cluster_centers_ = analytics.k_means_clustering(features, n_clusters)
@@ -52,25 +52,27 @@ def main():
     st.title("Telecom User & Handset Analytics Dashboard")
     # Define a custom color palette
     custom_colors = [
-    '#1f77b4',  # Blue
-    '#ff7f0e',  # Orange
-    '#2ca02c',  # Green
-    '#d62728',  # Red
-    '#9467bd',  # Purple
-    '#8c564b',  # Brown
-    '#e377c2',  # Pink
-    '#7f7f7f',  # Gray
-    '#bcbd22',  # Olive
-    '#17becf'   # Teal
+        '#1f77b4',  # Blue
+        '#ff7f0e',  # Orange
+        '#2ca02c',  # Green
+        '#d62728',  # Red
+        '#9467bd',  # Purple
+        '#8c564b',  # Brown
+        '#e377c2',  # Pink
+        '#7f7f7f',  # Gray
+        '#bcbd22',  # Olive
+        '#17becf'   # Teal
     ]
 
     # Load data
     df = load_data()
-   # Initialize the analysis and visualization classes
+    # Initialize the analysis and visualization classes
+   
     try:
         handset_analysis = HandsetAnalysis(df)
         handset_visualization = HandsetVisualization(custom_colors)
         analytics = ExperienceAnalytics(df)
+      
         
     except Exception as e:
         st.error(f"Error initializing classes: {e}")
@@ -82,8 +84,8 @@ def main():
             "User Analysis", "User Experience", 
             "Engagement Analysis",
             "User Satisfaction"
-            ]
-        )
+        ]
+    )
 
     # User Analysis Section
     if section == "User Analysis":
@@ -104,12 +106,12 @@ def main():
         # Display top handsets for each top manufacturer
         manufacturers = st.multiselect(
             "Select manufacturers", 
-            handset_analysis.top_manufacturers(top_n).index.tolist())
+            handset_analysis.top_manufacturers(top_n).index.tolist()
+        )
         if manufacturers:
             # Top handsets per manufacturer visualization
             top_handsets_per_manufacturer = handset_analysis.top_handsets_per_manufacturer(manufacturers)
             handset_visualization.visualize_top_handsets_per_manufacturer(top_handsets_per_manufacturer, manufacturers, top_n)
-
 
     # K-Means Clustering Section
     elif section == "User Experience":
@@ -131,7 +133,7 @@ def main():
             # Perform clustering and visualize the results
             perform_clustering(analytics, agg, features, n_clusters)
 
-    if section == "Engagement Analysis":
+    elif section == "Engagement Analysis":
         st.subheader("User Engagement Analysis")
         enga_analysis = UserEngagementAnalysis(df)
         enga_analysis.aggregate_metrics()
@@ -140,16 +142,27 @@ def main():
         st.sidebar.subheader("Top Customers Metrics")
         metric_choice = st.sidebar.selectbox(
             "Select Metric for Top Customers",
-            ['sessions_frequency', 
-            'total_session_duration', 
-            'total_download_traffic', 
-            'total_upload_traffic']
+            ['sessions_frequency', 'total_session_duration', 'total_download_traffic', 'total_upload_traffic']
         )
         
         top_customers = enga_analysis.report_top_customers()
+
         engagement_vis = UserEngagementVisualizations(df, custom_colors)
         
-        engagement_vis.plot_top_customers(top_customers[metric_choice], metric_choice)
+        # Map metrics to indices of the returned tuple
+        metric_map = {
+            'sessions_frequency': 0,
+            'total_session_duration': 1,
+            'total_download_traffic': 2,
+            'total_upload_traffic': 3
+        }
+        
+        if metric_choice in metric_map:
+            index = metric_map[metric_choice]
+            data_df = top_customers[index]
+            engagement_vis.plot_top_customers(data_df, metric_choice)
+        else:
+            st.error("Invalid metric choice.")
 
         # Elbow Method Visualization
         if st.sidebar.button('Show Elbow Method'):
@@ -161,10 +174,12 @@ def main():
                 wcss.append(kmeans.inertia_)
             engagement_vis.plot_elbow_method(wcss)
 
-        # Cluster Summary Visualization
+        # Ensure to call cluster_summary() to get the DataFrame
         if st.sidebar.button('Show Cluster Summary'):
             enga_analysis.normalize_and_cluster(n_clusters=3)
-            engagement_vis.plot_cluster_summary(enga_analysis.cluster_summary)
+            cluster_summary_df = enga_analysis.cluster_summary()  # Call the method to get DataFrame
+            engagement_vis.plot_cluster_summary(cluster_summary_df)
+
 
         # Top 3 apps used by customers
         if st.sidebar.button('Show Top 3 Apps'):
@@ -181,11 +196,11 @@ def main():
     # Satisfaction Dashboard Section
     elif section == "User Satisfaction":
         try:
-            satisfaction = SatisfactionDashboard()  # Initialize without custom_colors
-            satisfaction.show_satisfaction(custom_colors)  # Pass custom_colors to the method
+            satisfaction = SatisfactionDashboard(custom_colors)
+            # Initialize with custom_colors
+            satisfaction.show_satisfaction()  # No need to pass custom_colors again
         except Exception as e:
             st.error(f"Error initializing SatisfactionDashboard: {e}")
-
 
 if __name__ == "__main__":
     main()

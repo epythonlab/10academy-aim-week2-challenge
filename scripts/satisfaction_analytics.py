@@ -12,7 +12,10 @@ import psycopg2
 from psycopg2 import sql
 import pickle
 import matplotlib.pyplot as plt
-from db_connect import conn
+import os, sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from scripts.db_connect import conn
 
 
 class UserSatisfactionAnalytics:

@@ -28,7 +28,8 @@ class UserEngagementAnalysis:
             'Total UL (Bytes)': 'total_upload_traffic',
             'MSISDN/Number': 'sessions_frequency'
         }).reset_index()
-
+        
+    
     def report_top_customers(self):
         # Report the top 10 customers per engagement metric
         top_10_sessions = self.metrics.nlargest(10, 'sessions_frequency')
@@ -60,7 +61,12 @@ class UserEngagementAnalysis:
             'total_download_traffic': ['min', 'max', 'mean', 'sum'],
             'total_upload_traffic': ['min', 'max', 'mean', 'sum']
         }).reset_index()
+        
+        # Flatten the multi-level column index
+        cluster_summary.columns = ['_'.join(col).strip() for col in cluster_summary.columns.values]
+        
         return cluster_summary
+
 
     def aggregate_traffic_per_application(self, applications):
     
