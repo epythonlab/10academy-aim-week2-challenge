@@ -16,8 +16,9 @@ class SatisfactionDashboard:
         self.custom_colors = custom_colors
         # self.data_url1 = "test_data/engagement_score.csv"
         # self.url2 = "test_data/experience_score.csv"
-        self.data_url1 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/engagement_score.csv"
-        self.url2 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/experience_score.csv"
+        self.data_url1 = "https://drive.google.com/uc?export=download&id=1tkFPClCpd5d-DX2qKH-wkhazSKAfXQfC"
+        self.url2 = "https://drive.google.com/uc?export=download&id=1vTGWlpVY1w6gveKGmqPkJ1Hg08kkc8xh"
+       
     
     def load_data(self):
         """
