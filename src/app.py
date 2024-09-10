@@ -26,7 +26,7 @@ except ImportError as e:
 @st.cache_data
 def load_data():
     # data_url = "test_data/xdr_cleaned.csv"
-    self.data_url1 = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/xdr_cleaned.csv"
+    data_url = "https://raw.githubusercontent.com/epythonlab/10academy-aim-week2-challenge/master/src/test_data/xdr_cleaned.csv"
       
     df = pd.read_csv(data_url)
     return df
